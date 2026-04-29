@@ -1,166 +1,339 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Encuesta — Asistente Tributario</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Encuesta — Asistente Tributario | Municipalidad de Pangoa</title>
+    
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+    
+    <!-- SDK de EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --verde-deep:   #0b3d20;
+            --verde-main:   #145c32;
+            --verde-mid:    #1e7a44;
+            --verde-light:  #d6ede0;
+            --verde-pale:   #f0f7f2;
+            --gold:         #c8a84b;
+            --gold-light:   #f5edd8;
+            --text-dark:    #1a2e1e;
+            --text-mid:     #3d5c45;
+            --text-soft:    #6b8f74;
+            --border:       #c5dcc9;
+            --white:        #ffffff;
+            --shadow-sm:    0 2px 8px rgba(11,61,32,0.08);
+            --shadow-md:    0 8px 32px rgba(11,61,32,0.12);
+            --shadow-lg:    0 20px 60px rgba(11,61,32,0.16);
+            --radius:       16px;
+            --radius-sm:    10px;
+        }
 
-<style>
-body{font-family:'DM Sans',sans-serif;background:#f0f7f2;margin:0;padding:0}
-.page-wrap{max-width:700px;margin:auto;padding:20px}
-textarea,select{width:100%;margin-top:5px;margin-bottom:10px;padding:10px}
-button{padding:12px 20px;border:none;background:#145c32;color:white;cursor:pointer;border-radius:8px}
-.success-screen{display:none;text-align:center;padding:40px;background:white;border-radius:10px}
-</style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--verde-pale);
+            color: var(--text-dark);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Fondo decorativo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 420px;
+            background: linear-gradient(160deg, var(--verde-deep) 0%, var(--verde-main) 55%, var(--verde-mid) 100%);
+            z-index: 0;
+            clip-path: ellipse(120% 100% at 50% 0%);
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        /* Header */
+        .header { padding: 48px 0 36px; text-align: center; color: white; }
+        .header-logo {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 40px; padding: 7px 18px 7px 12px; margin-bottom: 24px; backdrop-filter: blur(8px);
+        }
+        .header-logo-icon { width: 28px; height: 28px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .header-logo-text { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.85); }
+        .header-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 5vw, 36px); font-weight: 400; line-height: 1.15; margin-bottom: 12px; color: #ffffff; }
+        .header-title em { font-style: italic; color: #f5d98a; }
+        .header-sub { font-size: 14px; color: rgba(255,255,255,0.72); font-weight: 400; line-height: 1.6; max-width: 480px; margin: 0 auto; }
+
+        /* Tarjetas y Secciones */
+        .intro-card { background: white; border-radius: var(--radius); padding: 28px 32px; margin-bottom: 20px; box-shadow: var(--shadow-md); border-left: 4px solid var(--gold); animation: slideUp 0.5s ease both; }
+        .intro-card p { font-size: 14px; line-height: 1.75; color: var(--text-mid); }
+        .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); margin: 32px 0 14px; display: flex; align-items: center; gap: 8px; }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .question-card { background: white; border-radius: var(--radius); padding: 28px 32px; margin-bottom: 16px; box-shadow: var(--shadow-sm); border: 1.5px solid transparent; transition: all 0.2s; animation: slideUp 0.5s ease both; }
+        .question-card:focus-within { border-color: var(--verde-main); box-shadow: var(--shadow-md), 0 0 0 4px rgba(20,92,50,0.07); transform: translateY(-2px); }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--verde-light); color: var(--verde-main); border-radius: 50%; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+        .question-text { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; }
+        .question-hint { font-size: 12px; color: var(--text-soft); margin-bottom: 14px; }
+
+        /* Inputs */
+        input[type=text], textarea, select { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; background: var(--verde-pale); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; outline: none; transition: all 0.2s; }
+        input:focus, textarea:focus, select:focus { border-color: var(--verde-main); background: white; box-shadow: 0 0 0 3px rgba(20,92,50,0.08); }
+
+        /* Pares Pregunta-Respuesta */
+        .pair-group { background: white; border-radius: var(--radius); padding: 28px 32px; margin-bottom: 16px; box-shadow: var(--shadow-sm); border: 1.5px solid var(--border); }
+        .pair-group-title { font-size: 13px; font-weight: 700; color: var(--verde-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        .pair-group-title span { background: var(--verde-main); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        .pair-item { padding: 16px; background: var(--verde-pale); border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
+        .pair-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-soft); margin-bottom: 4px; }
+
+        /* Botones */
+        .add-btn { display: flex; align-items: center; gap: 8px; background: none; border: 1.5px dashed var(--border); border-radius: var(--radius-sm); padding: 10px 18px; font-weight: 600; color: var(--text-soft); cursor: pointer; width: 100%; justify-content: center; margin-top: 12px; }
+        .remove-btn { color: #c0392b; font-size: 11px; font-weight: 600; cursor: pointer; border: none; background: none; margin-top: 8px; }
+        
+        .submit-btn { display: inline-flex; align-items: center; gap: 12px; background: linear-gradient(135deg, var(--verde-main), var(--verde-mid)); color: white; border: none; border-radius: 50px; padding: 16px 48px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(20,92,50,0.3); transition: all 0.22s; }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(20,92,50,0.38); }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+        /* Grid Categorías */
+        .cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .cat-option { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--verde-pale); border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; transition: all 0.18s; }
+        .cat-option input { display: none; }
+        .cat-check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: transparent; }
+        .cat-option input:checked + .cat-check { background: var(--verde-main); border-color: var(--verde-main); color: white; }
+        .cat-option:has(input:checked) { border-color: var(--verde-main); background: #eaf5ee; color: var(--verde-main); font-weight: 600; }
+
+        /* Rating */
+        .rating-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .rating-opt { flex: 1; min-width: 48px; }
+        .rating-opt input { display: none; }
+        .rating-opt label { display: flex; flex-direction: column; align-items: center; padding: 10px; background: var(--verde-pale); border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.18s; }
+        .rating-opt input:checked + label { border-color: var(--verde-main); background: var(--verde-light); }
+
+        /* Éxito */
+        .success-screen { display: none; text-align: center; background: white; border-radius: var(--radius); padding: 60px 40px; box-shadow: var(--shadow-lg); animation: slideUp 0.5s ease; }
+        .success-icon { width: 80px; height: 80px; background: var(--verde-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 24px; }
+
+        /* Barra de progreso */
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--gold); width: 0%; z-index: 100; transition: width 0.3s; }
+        .req { color: #e24b4a; margin-left: 3px; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 480px) { .cat-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
-
 <body>
+
+<div class="progress-bar" id="progressBar"></div>
 
 <div class="page-wrap">
 
-<h2>Encuesta Asistente Tributario</h2>
+    <div class="header">
+        <div class="header-logo">
+            <div class="header-logo-icon">🏛️</div>
+            <span class="header-logo-text">Municipalidad Distrital de Pangoa</span>
+        </div>
+        <h1 class="header-title">Encuesta para el<br><em>Asistente Tributario Virtual</em></h1>
+        <p class="header-sub">Tu experiencia es clave para entrenar nuestra IA.</p>
+    </div>
 
-<form id="encuestaForm">
+    <div id="formSection">
+        <div class="intro-card">
+            <p>Ayúdanos a responder mejor a los ciudadanos. Este formulario es anónimo y los datos se usarán para mejorar el sistema automatizado de rentas.</p>
+        </div>
 
-<label>Área *</label>
-<select id="area" required>
-<option value="">Selecciona</option>
-<option>Atención</option>
-<option>Cobranza</option>
-</select>
+        <form id="encuestaForm" novalidate>
+            <div class="section-label">Sección 1 — Datos del trabajador</div>
+            <div class="question-card">
+                <div class="question-number">1</div>
+                <div class="question-text">¿En qué área trabajas? <span class="req">*</span></div>
+                <select id="area" required>
+                    <option value="">— Selecciona tu área —</option>
+                    <option>Ventanilla de atención</option>
+                    <option>Fiscalización tributaria</option>
+                    <option>Cobranza y recuperación</option>
+                    <option>Orientación y asesoría</option>
+                    <option>Caja / Recaudación</option>
+                    <option>Otro</option>
+                </select>
+            </div>
 
-<label>Experiencia</label>
-<select id="experiencia">
-<option value="">Selecciona</option>
-<option>1-2 años</option>
-<option>3-5 años</option>
-</select>
+            <div class="question-card">
+                <div class="question-number">2</div>
+                <div class="question-text">Experiencia en el área</div>
+                <select id="experiencia">
+                    <option value="">— Selecciona —</option>
+                    <option>Menos de 1 año</option>
+                    <option>1 a 2 años</option>
+                    <option>3 a 5 años</option>
+                    <option>Más de 5 años</option>
+                </select>
+            </div>
 
-<h3>Pares pregunta-respuesta</h3>
+            <div class="section-label">Sección 2 — Temas frecuentes</div>
+            <div class="question-card">
+                <div class="question-number">3</div>
+                <div class="question-text">Temas de mayor consulta <span class="req">*</span></div>
+                <div class="cat-grid">
+                    <label class="cat-option"><input type="checkbox" name="temas" value="pagos"><div class="cat-check">✓</div>💳 Pagos</label>
+                    <label class="cat-option"><input type="checkbox" name="temas" value="deudas"><div class="cat-check">✓</div>📋 Deudas</label>
+                    <label class="cat-option"><input type="checkbox" name="temas" value="multas"><div class="cat-check">✓</div>⚠️ Multas</label>
+                    <label class="cat-option"><input type="checkbox" name="temas" value="fraccionamiento"><div class="cat-check">✓</div>🗓️ Fraccionamiento</label>
+                    <label class="cat-option"><input type="checkbox" name="temas" value="predios"><div class="cat-check">✓</div>🏠 Predios</label>
+                    <label class="cat-option"><input type="checkbox" name="temas" value="otros"><div class="cat-check">✓</div>➕ Otros</label>
+                </div>
+            </div>
 
-<div id="pairsContainer">
+            <div class="section-label">Sección 3 — Preguntas y respuestas reales</div>
+            <div class="pair-group">
+                <div class="pair-group-title"><span>💬</span> Casos reales</div>
+                <div id="pairsContainer">
+                    <div class="pair-item" id="pair-1">
+                        <div class="pair-label">❓ Pregunta del contribuyente <span class="req">*</span></div>
+                        <textarea name="pregunta[]" rows="2" placeholder='Ej: "¿Cuánto debo de predial?"'></textarea>
+                        <div class="pair-label">💬 Tu respuesta <span class="req">*</span></div>
+                        <textarea name="respuesta[]" rows="3" placeholder='Ej: "Le indico que presente su DNI en ventanilla..."'></textarea>
+                        <div class="pair-label">🏷️ Categoría</div>
+                        <select name="categoria[]">
+                            <option value="otros">Otros</option>
+                            <option value="pagos">Pagos</option>
+                            <option value="deudas">Deudas</option>
+                            <option value="multas">Multas</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" class="add-btn" id="addPairBtn">＋ Agregar otra pregunta</button>
+            </div>
 
-<div class="pair-item">
-<textarea name="pregunta[]" placeholder="Pregunta"></textarea>
-<textarea name="respuesta[]" placeholder="Respuesta"></textarea>
+            <div class="section-label">Sección 4 — Adicionales</div>
+            <div class="question-card">
+                <div class="question-number">4</div>
+                <div class="question-text">¿Sugerencias para el asistente?</div>
+                <textarea id="sugerencias" rows="3" placeholder="Escribe aquí..."></textarea>
+            </div>
 
-<select name="categoria[]">
-<option value="">Categoría</option>
-<option value="pagos">Pagos</option>
-<option value="deudas">Deudas</option>
-<option value="multas">Multas</option>
-<option value="fraccionamiento">Fraccionamiento</option>
-<option value="otros">Otros</option>
-</select>
+            <div class="submit-wrap" style="text-align: center; margin-top: 30px;">
+                <button type="submit" id="btnSubmit" class="submit-btn">
+                    <span>✉️</span> Enviar Respuestas
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="success-screen" id="successScreen">
+        <div class="success-icon">✅</div>
+        <h2 class="success-title">¡Enviado con éxito!</h2>
+        <p id="successMsg" class="success-sub"></p>
+        <div class="success-badge">🏛️ Municipalidad de Pangoa</div>
+    </div>
 </div>
-
-</div>
-
-<button type="button" id="addPairBtn">Agregar</button>
-
-<br><br>
-<button type="submit">Enviar</button>
-
-</form>
-
-<div class="success-screen" id="successScreen">
-<h2>✅ Enviado correctamente</h2>
-<p id="successMsg"></p>
-</div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <script>
+    // Inicializar EmailJS con tu ID de usuario
+    emailjs.init("rkEmoXTkGniBt1_t-");
 
-emailjs.init("rkEmoXTkGniBt1_t-");
+    // Barra de progreso
+    window.addEventListener('scroll', () => {
+        const doc = document.documentElement;
+        const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+        document.getElementById('progressBar').style.width = pct + '%';
+    });
 
-let pairCount = 1;
+    // Agregar/Eliminar pares
+    let pairCount = 1;
+    document.getElementById('addPairBtn').onclick = () => {
+        pairCount++;
+        const div = document.createElement('div');
+        div.className = 'pair-item';
+        div.id = `pair-${pairCount}`;
+        div.innerHTML = `
+            <div class="pair-label">❓ Pregunta del contribuyente</div>
+            <textarea name="pregunta[]" rows="2"></textarea>
+            <div class="pair-label">💬 Tu respuesta</div>
+            <textarea name="respuesta[]" rows="3"></textarea>
+            <button type="button" class="remove-btn" onclick="document.getElementById('pair-${pairCount}').remove()">✕ Eliminar</button>
+        `;
+        document.getElementById('pairsContainer').appendChild(div);
+    };
 
-document.getElementById("addPairBtn").onclick = () => {
-  pairCount++;
+    // Manejo del envío
+    document.getElementById('encuestaForm').onsubmit = function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('btnSubmit');
+        const area = document.getElementById('area').value;
+        const temas = document.querySelectorAll('input[name="temas"]:checked');
+        const primPreg = document.querySelector('textarea[name="pregunta[]"]').value.trim();
+        const primResp = document.querySelector('textarea[name="respuesta[]"]').value.trim();
 
-  const div = document.createElement("div");
-  div.className = "pair-item";
+        // Validaciones Obligatorias
+        if(!area) { alert("Por favor selecciona tu área."); return; }
+        if(temas.length === 0) { alert("Selecciona al menos un tema frecuente."); return; }
+        if(!primPreg || !primResp) { alert("Debes completar al menos una pregunta y su respuesta."); return; }
 
-  div.innerHTML = `
-    <textarea name="pregunta[]" placeholder="Pregunta"></textarea>
-    <textarea name="respuesta[]" placeholder="Respuesta"></textarea>
-    <select name="categoria[]">
-      <option value="">Categoría</option>
-      <option value="pagos">Pagos</option>
-      <option value="deudas">Deudas</option>
-      <option value="multas">Multas</option>
-      <option value="fraccionamiento">Fraccionamiento</option>
-      <option value="otros">Otros</option>
-    </select>
-  `;
+        btn.disabled = true;
+        btn.innerHTML = "Enviando...";
 
-  document.getElementById("pairsContainer").appendChild(div);
-};
+        // Recopilar datos
+        const preguntas = document.querySelectorAll('textarea[name="pregunta[]"]');
+        const respuestas = document.querySelectorAll('textarea[name="respuesta[]"]');
+        const pares = [];
+        preguntas.forEach((p, i) => {
+            if(p.value.trim()) {
+                pares.push({ p: p.value.trim(), r: respuestas[i].value.trim() });
+            }
+        });
 
-document.getElementById("encuestaForm").addEventListener("submit", function(e){
-  e.preventDefault();
+        const datos = {
+            area: area,
+            experiencia: document.getElementById('experiencia').value,
+            temas: Array.from(temas).map(t => t.value),
+            pares: pares,
+            sugerencias: document.getElementById('sugerencias').value,
+            fecha: new Date().toLocaleString()
+        };
 
-  const area = document.getElementById("area").value;
-  if(!area){ alert("Completa el área"); return; }
+        const jsonString = JSON.stringify(datos, null, 2);
 
-  const preguntas = document.querySelectorAll('textarea[name="pregunta[]"]');
-  const respuestas = document.querySelectorAll('textarea[name="respuesta[]"]');
-  const categorias = document.querySelectorAll('select[name="categoria[]"]');
+        // Enviar vía EmailJS
+        emailjs.send("service_yn9w98h", "template_qs4mdkl", {
+            message: jsonString
+        })
+        .then(() => {
+            // Descargar JSON de respaldo
+            const blob = new Blob([jsonString], {type: "application/json"});
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `encuesta_pangoa_${Date.now()}.json`;
+            a.click();
 
-  const pares = [];
-
-  preguntas.forEach((p,i)=>{
-    if(p.value.trim()){
-      pares.push({
-        pregunta: p.value.trim(),
-        respuesta: respuestas[i]?.value.trim() || "",
-        categoria: categorias[i]?.value || "otros"
-      });
-    }
-  });
-
-  const datos = {
-    area,
-    experiencia: document.getElementById("experiencia").value,
-    pares,
-    fecha: new Date().toLocaleString()
-  };
-
-  const json = JSON.stringify(datos, null, 2);
-
-  emailjs.send("service_yn9w98h","template_qs4mdkl",{
-    message: json
-  })
-  .then(()=>{
-
-    const blob = new Blob([json],{type:"application/json"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "encuesta.json";
-    a.click();
-
-    document.getElementById("encuestaForm").style.display="none";
-    document.getElementById("successScreen").style.display="block";
-
-    document.getElementById("successMsg").innerHTML = `
-      📩 Tus respuestas fueron enviadas automáticamente.<br><br>
-      📄 También se descargó un archivo JSON como respaldo.<br><br>
-      💡 Puedes enviarlo por WhatsApp si deseas.
-    `;
-
-  })
-  .catch(err=>{
-    alert("Error al enviar");
-    console.error(err);
-  });
-
-});
-
+            // Interfaz de éxito
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('successScreen').style.display = 'block';
+            document.getElementById('successMsg').innerHTML = `
+                Tus respuestas han sido enviadas al sistema.<br><br>
+                <strong>Se ha descargado un archivo .json</strong> como copia de seguridad.
+            `;
+            window.scrollTo(0,0);
+        })
+        .catch(err => {
+            alert("Error al enviar: " + JSON.stringify(err));
+            btn.disabled = false;
+            btn.innerHTML = "✉️ Reintentar Envío";
+        });
+    };
 </script>
 
 </body>
