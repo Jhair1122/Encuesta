@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Encuesta — Asistente Tributario</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet"/>
+
+<style>
+body{font-family:'DM Sans',sans-serif;background:#f0f7f2;margin:0;padding:0}
+.page-wrap{max-width:700px;margin:auto;padding:20px}
+textarea,select{width:100%;margin-top:5px;margin-bottom:10px;padding:10px}
+button{padding:12px 20px;border:none;background:#145c32;color:white;cursor:pointer;border-radius:8px}
+.success-screen{display:none;text-align:center;padding:40px;background:white;border-radius:10px}
+</style>
+</head>
+
+<body>
+
+<div class="page-wrap">
+
+<h2>Encuesta Asistente Tributario</h2>
+
+<form id="encuestaForm">
+
+<label>Área *</label>
+<select id="area" required>
+<option value="">Selecciona</option>
+<option>Atención</option>
+<option>Cobranza</option>
+</select>
+
+<label>Experiencia</label>
+<select id="experiencia">
+<option value="">Selecciona</option>
+<option>1-2 años</option>
+<option>3-5 años</option>
+</select>
+
+<h3>Pares pregunta-respuesta</h3>
+
+<div id="pairsContainer">
+
+<div class="pair-item">
+<textarea name="pregunta[]" placeholder="Pregunta"></textarea>
+<textarea name="respuesta[]" placeholder="Respuesta"></textarea>
+
+<select name="categoria[]">
+<option value="">Categoría</option>
+<option value="pagos">Pagos</option>
+<option value="deudas">Deudas</option>
+<option value="multas">Multas</option>
+<option value="fraccionamiento">Fraccionamiento</option>
+<option value="otros">Otros</option>
+</select>
+</div>
+
+</div>
+
+<button type="button" id="addPairBtn">Agregar</button>
+
+<br><br>
+<button type="submit">Enviar</button>
+
+</form>
+
+<div class="success-screen" id="successScreen">
+<h2>✅ Enviado correctamente</h2>
+<p id="successMsg"></p>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+
+emailjs.init("rkEmoXTkGniBt1_t-");
+
+let pairCount = 1;
+
+document.getElementById("addPairBtn").onclick = () => {
+  pairCount++;
+
+  const div = document.createElement("div");
+  div.className = "pair-item";
+
+  div.innerHTML = `
+    <textarea name="pregunta[]" placeholder="Pregunta"></textarea>
+    <textarea name="respuesta[]" placeholder="Respuesta"></textarea>
+    <select name="categoria[]">
+      <option value="">Categoría</option>
+      <option value="pagos">Pagos</option>
+      <option value="deudas">Deudas</option>
+      <option value="multas">Multas</option>
+      <option value="fraccionamiento">Fraccionamiento</option>
+      <option value="otros">Otros</option>
+    </select>
+  `;
+
+  document.getElementById("pairsContainer").appendChild(div);
+};
+
+document.getElementById("encuestaForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const area = document.getElementById("area").value;
+  if(!area){ alert("Completa el área"); return; }
+
+  const preguntas = document.querySelectorAll('textarea[name="pregunta[]"]');
+  const respuestas = document.querySelectorAll('textarea[name="respuesta[]"]');
+  const categorias = document.querySelectorAll('select[name="categoria[]"]');
+
+  const pares = [];
+
+  preguntas.forEach((p,i)=>{
+    if(p.value.trim()){
+      pares.push({
+        pregunta: p.value.trim(),
+        respuesta: respuestas[i]?.value.trim() || "",
+        categoria: categorias[i]?.value || "otros"
+      });
+    }
+  });
+
+  const datos = {
+    area,
+    experiencia: document.getElementById("experiencia").value,
+    pares,
+    fecha: new Date().toLocaleString()
+  };
+
+  const json = JSON.stringify(datos, null, 2);
+
+  emailjs.send("service_yn9w98h","template_qs4mdkl",{
+    message: json
+  })
+  .then(()=>{
+
+    const blob = new Blob([json],{type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "encuesta.json";
+    a.click();
+
+    document.getElementById("encuestaForm").style.display="none";
+    document.getElementById("successScreen").style.display="block";
+
+    document.getElementById("successMsg").innerHTML = `
+      📩 Tus respuestas fueron enviadas automáticamente.<br><br>
+      📄 También se descargó un archivo JSON como respaldo.<br><br>
+      💡 Puedes enviarlo por WhatsApp si deseas.
+    `;
+
+  })
+  .catch(err=>{
+    alert("Error al enviar");
+    console.error(err);
+  });
+
+});
+
+</script>
+
+</body>
+</html>
