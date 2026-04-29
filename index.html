@@ -69,7 +69,6 @@
         .pair-item{padding:16px;background:var(--verde-pale);border-radius:var(--radius-sm);
             margin-bottom:12px;border:1px solid var(--border);}
         .pair-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-soft);margin-bottom:4px;}
-        /* ── FIX 4: Hint para variantes ── */
         .pair-hint{font-size:11px;color:var(--text-soft);margin-bottom:6px;font-style:italic;}
 
         .add-btn{display:flex;align-items:center;gap:8px;background:none;border:1.5px dashed var(--border);
@@ -103,22 +102,21 @@
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @media(max-width:480px){.cat-grid{grid-template-columns:1fr;}}
 
-.header-banner {
-    width: 100%;
-    max-height: 180px;
-    border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-md);
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-.header-banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
+        /* ── Logo centrado ── */
+        .header-banner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 28px;
+        }
+        .header-banner img {
+            max-width: 220px;
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 20px rgba(0,0,0,0.25));
+        }
     </style>
 </head>
 <body>
@@ -126,10 +124,9 @@
 <div class="page-wrap">
 
     <div class="header">
-
-<div class="header-banner">
-    <img src="logo.png">
-</div>
+        <div class="header-banner">
+            <img src="/logo.png" alt="Municipalidad Distrital de Pangoa">
+        </div>
         <div class="header-logo">
             <div class="header-logo-icon">🏛️</div>
             <span class="header-logo-text">Municipalidad Distrital de Pangoa</span>
@@ -192,14 +189,12 @@
                 <div class="pair-group-title"><span>💬</span> Casos reales</div>
 
                 <div id="pairsContainer">
-
                     <div class="pair-item" id="pair-1">
                         <div class="pair-label">❓ Pregunta del contribuyente <span class="req">*</span></div>
                         <textarea name="pregunta[]" rows="2" placeholder='Ej: "¿Cuánto debo de predial?"'></textarea>
 
                         <div class="pair-label" style="margin-top:10px;">💬 Tu respuesta <span class="req">*</span></div>
                         <textarea name="respuesta[]" rows="3" placeholder='Ej: "Le indico que presente su DNI en ventanilla..."'></textarea>
-
 
                         <div class="pair-label" style="margin-top:10px;">🏷️ Categoría <span class="req">*</span></div>
                         <select name="categoria[]">
@@ -216,7 +211,6 @@
                             <option value="ubicacion">📍 Ubicación</option>
                             <option value="arbitrios">🏙️ Arbitrios</option>
                         </select>
-
 
                         <div class="pair-label" style="margin-top:10px;">🔄 Otras formas de hacer la misma pregunta</div>
                         <div class="pair-hint">Separa cada variante con punto y coma (;). Ej: ¿Cuánto debo?; ¿Tengo deuda?; cuánto me falta pagar</div>
@@ -255,9 +249,7 @@
 </div>
 
 <script>
-
     emailjs.init("rkEmoXTkGniBt1_t-");
-
 
     window.addEventListener('scroll', () => {
         const doc = document.documentElement;
@@ -309,16 +301,16 @@
     document.getElementById('encuestaForm').onsubmit = function(e) {
         e.preventDefault();
 
-        const btn     = document.getElementById('btnSubmit');
-        const area    = document.getElementById('area').value;
-        const temas   = document.querySelectorAll('input[name="temas"]:checked');
+        const btn      = document.getElementById('btnSubmit');
+        const area     = document.getElementById('area').value;
+        const temas    = document.querySelectorAll('input[name="temas"]:checked');
         const primPreg = document.querySelector('textarea[name="pregunta[]"]').value.trim();
         const primResp = document.querySelector('textarea[name="respuesta[]"]').value.trim();
 
-        if (!area)            { alert("Por favor selecciona tu área.");                    return; }
-        if (temas.length===0) { alert("Selecciona al menos un tema frecuente.");           return; }
-        if (!primPreg)        { alert("Completa al menos una pregunta.");                  return; }
-        if (!primResp)        { alert("Completa la respuesta del primer par.");            return; }
+        if (!area)            { alert("Por favor selecciona tu área.");           return; }
+        if (temas.length===0) { alert("Selecciona al menos un tema frecuente."); return; }
+        if (!primPreg)        { alert("Completa al menos una pregunta.");         return; }
+        if (!primResp)        { alert("Completa la respuesta del primer par.");   return; }
 
         btn.disabled = true;
         btn.innerHTML = "Enviando...";
@@ -334,18 +326,15 @@
             const respuesta = respuestas[i] ? respuestas[i].value.trim() : "";
             if (!pregunta || !respuesta) return;
 
-            const vars_raw = variantesT[i] ? variantesT[i].value.trim() : "";
+            const vars_raw  = variantesT[i] ? variantesT[i].value.trim() : "";
             const variantes = vars_raw
                 ? vars_raw.split(";").map(v => v.trim()).filter(v => v.length > 0)
                 : [];
 
             pares_dataset.push({
-
                 categoria: categorias[i] ? categorias[i].value : "otros",
-
                 pregunta:  pregunta,
                 respuesta: respuesta,
-
                 variantes: variantes
             });
         });
@@ -353,12 +342,12 @@
         const jsonFinal = JSON.stringify(pares_dataset, null, 2);
 
         const metadata = {
-            area:         area,
-            experiencia:  document.getElementById('experiencia').value,
-            temas:        Array.from(temas).map(t => t.value),
-            sugerencias:  document.getElementById('sugerencias').value,
-            fecha:        new Date().toLocaleString(),
-            total_pares:  pares_dataset.length
+            area:        area,
+            experiencia: document.getElementById('experiencia').value,
+            temas:       Array.from(temas).map(t => t.value),
+            sugerencias: document.getElementById('sugerencias').value,
+            fecha:       new Date().toLocaleString(),
+            total_pares: pares_dataset.length
         };
 
         const mensajeEmail = JSON.stringify({
@@ -376,15 +365,28 @@
             a.download = `encuesta_pangoa_${Date.now()}.json`;
             a.click();
 
-            document.getElementById('formSection').style.display    = 'none';
-            document.getElementById('successScreen').style.display  = 'block';
+            document.getElementById('formSection').style.display   = 'none';
+            document.getElementById('successScreen').style.display = 'block';
             document.getElementById('successMsg').innerHTML = `
                 Tus respuestas han sido enviadas correctamente.<br><br>
-                Se ha descargado un archivo <strong>.json</strong> con
-                <strong>${pares_dataset.length} par(es)</strong> listos para
-                unirse al dataset de entrenamiento del asistente.<br><br>
-                <em style="font-size:12px;color:#6b8f74;">El archivo tiene el formato exacto que
-                necesita el script de entrenamiento.</em>
+                📥 Se ha descargado un archivo <strong>.json</strong> con
+                <strong>${pares_dataset.length} par(es)</strong> en tu carpeta de
+                <strong>Descargas</strong>.<br><br>
+                <div style="background:#f0fdf4;border:2px solid #25d366;border-radius:12px;
+                            padding:16px 20px;margin-top:16px;text-align:left;">
+                    <strong style="color:#14532d;">📱 Envía el archivo por WhatsApp:</strong>
+                    <ol style="margin-top:10px;padding-left:18px;line-height:2.2;font-size:13px;color:#166534;">
+                        <li>Abre <strong>WhatsApp</strong></li>
+                        <li>Busca el contacto del encargado</li>
+                        <li>Toca el ícono de <strong>adjuntar 📎</strong></li>
+                        <li>Selecciona <strong>"Documento"</strong></li>
+                        <li>Busca en <strong>Descargas</strong> el archivo <em>encuesta_pangoa_...</em></li>
+                        <li>Toca <strong>Enviar ✉️</strong></li>
+                    </ol>
+                </div>
+                <em style="font-size:12px;color:#6b8f74;display:block;margin-top:12px;">
+                    El archivo tiene el formato exacto que necesita el script de entrenamiento.
+                </em>
             `;
             window.scrollTo(0, 0);
         })
