@@ -103,7 +103,6 @@
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @media(max-width:480px){.cat-grid{grid-template-columns:1fr;}}
 
-        /* ── Banner imagen superior ── */
 .header-banner {
     width: 100%;
     max-height: 180px;
@@ -127,7 +126,7 @@
 <div class="page-wrap">
 
     <div class="header">
-        <!-- Banner imagen -->
+
 <div class="header-banner">
     <img src="logo.png">
 </div>
@@ -193,7 +192,7 @@
                 <div class="pair-group-title"><span>💬</span> Casos reales</div>
 
                 <div id="pairsContainer">
-                    <!-- ── FIX 3 + FIX 4: Par base con categoria Y variantes ── -->
+
                     <div class="pair-item" id="pair-1">
                         <div class="pair-label">❓ Pregunta del contribuyente <span class="req">*</span></div>
                         <textarea name="pregunta[]" rows="2" placeholder='Ej: "¿Cuánto debo de predial?"'></textarea>
@@ -201,7 +200,7 @@
                         <div class="pair-label" style="margin-top:10px;">💬 Tu respuesta <span class="req">*</span></div>
                         <textarea name="respuesta[]" rows="3" placeholder='Ej: "Le indico que presente su DNI en ventanilla..."'></textarea>
 
-                        <!-- FIX 3: Categoría en el primer par -->
+
                         <div class="pair-label" style="margin-top:10px;">🏷️ Categoría <span class="req">*</span></div>
                         <select name="categoria[]">
                             <option value="otros">Otros</option>
@@ -218,7 +217,7 @@
                             <option value="arbitrios">🏙️ Arbitrios</option>
                         </select>
 
-                        <!-- FIX 4: Variantes -->
+
                         <div class="pair-label" style="margin-top:10px;">🔄 Otras formas de hacer la misma pregunta</div>
                         <div class="pair-hint">Separa cada variante con punto y coma (;). Ej: ¿Cuánto debo?; ¿Tengo deuda?; cuánto me falta pagar</div>
                         <textarea name="variantes[]" rows="2" placeholder="¿Cuánto debo?; ¿Tengo deudas?; cuánto me falta pagar"></textarea>
@@ -256,17 +255,16 @@
 </div>
 
 <script>
-    // Inicializar EmailJS
+
     emailjs.init("rkEmoXTkGniBt1_t-");
 
-    // Barra de progreso
+
     window.addEventListener('scroll', () => {
         const doc = document.documentElement;
         const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
         document.getElementById('progressBar').style.width = pct + '%';
     });
 
-    // ── FIX 3 + FIX 4: Agregar par con categoria Y variantes ──────────────────
     let pairCount = 1;
     document.getElementById('addPairBtn').onclick = () => {
         pairCount++;
@@ -308,7 +306,6 @@
         document.getElementById('pairsContainer').appendChild(div);
     };
 
-    // ── FIX 1 + FIX 2 + FIX 5: Recolectar datos con nombres y estructura correctos ──
     document.getElementById('encuestaForm').onsubmit = function(e) {
         e.preventDefault();
 
@@ -326,41 +323,35 @@
         btn.disabled = true;
         btn.innerHTML = "Enviando...";
 
-        // Recolectar pares con los nombres correctos que espera el script de entrenamiento
         const preguntas  = document.querySelectorAll('textarea[name="pregunta[]"]');
         const respuestas = document.querySelectorAll('textarea[name="respuesta[]"]');
         const categorias = document.querySelectorAll('select[name="categoria[]"]');
         const variantesT = document.querySelectorAll('textarea[name="variantes[]"]');
 
-        // ── FIX 5: Estructura de salida = array igual al dataset_respuestas.json ──
-        // Cada elemento: { categoria, pregunta, respuesta, variantes: [] }
         const pares_dataset = [];
         preguntas.forEach((p, i) => {
             const pregunta  = p.value.trim();
             const respuesta = respuestas[i] ? respuestas[i].value.trim() : "";
-            if (!pregunta || !respuesta) return; // omitir vacíos
+            if (!pregunta || !respuesta) return;
 
-            // FIX 4: Convertir string de variantes separadas por ";" en array limpio
             const vars_raw = variantesT[i] ? variantesT[i].value.trim() : "";
             const variantes = vars_raw
                 ? vars_raw.split(";").map(v => v.trim()).filter(v => v.length > 0)
                 : [];
 
             pares_dataset.push({
-                // FIX 3: categoria por par
+
                 categoria: categorias[i] ? categorias[i].value : "otros",
-                // FIX 1 + FIX 2: nombres correctos "pregunta" y "respuesta"
+
                 pregunta:  pregunta,
                 respuesta: respuesta,
-                // FIX 4: variantes como array
+
                 variantes: variantes
             });
         });
 
-        // JSON final — mismo formato que dataset_respuestas.json del script de entrenamiento
         const jsonFinal = JSON.stringify(pares_dataset, null, 2);
 
-        // Metadata separada para el email (no va al entrenamiento)
         const metadata = {
             area:         area,
             experiencia:  document.getElementById('experiencia').value,
@@ -375,12 +366,10 @@
             dataset:  pares_dataset
         }, null, 2);
 
-        // Enviar por EmailJS
         emailjs.send("service_yn9w98h", "template_qs4mdkl", {
             message: mensajeEmail
         })
         .then(() => {
-            // Descargar JSON con el formato correcto para unir al dataset
             const blob = new Blob([jsonFinal], { type: "application/json" });
             const a    = document.createElement("a");
             a.href     = URL.createObjectURL(blob);
