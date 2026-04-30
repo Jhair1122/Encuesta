@@ -1,1074 +1,744 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Encuesta — Asistente Tributario | Municipalidad de Pangoa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <style>
-        :root {
-            --g0: #04160a;
-            --g1: #072010;
-            --g2: #0d3319;
-            --g3: #155228;
-            --g4: #1d6e37;
-            --g5: #2a9050;
-            --g6: #5cb87a;
-            --g-pale: #ebf7ef;
-            --g-ghost: #f4fbf6;
-            --gold: #c9a84c;
-            --gold2: #f0c96a;
-            --gold-pale: #fdf6e3;
-            --cream: #fefcf8;
-            --text1: #0d1f12;
-            --text2: #2c4f35;
-            --text3: #5a7d63;
-            --text4: #91b09a;
-            --red: #e03e3e;
-            --shadow-card: 0 4px 24px rgba(4,22,10,0.10);
-            --shadow-lifted: 0 12px 48px rgba(4,22,10,0.16);
-            --shadow-gold: 0 4px 24px rgba(201,168,76,0.28);
-            --r: 20px;
-            --r-sm: 12px;
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Asistente Tributario — Municipalidad de Pangoa</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g0:#03120a;--g1:#062014;--g2:#0c3820;--g3:#15542f;--g4:#1f7343;--g5:#2c9459;--g6:#42bb75;
+  --gold:#c9a23c;--gold2:#f0cb70;--gold3:#fde9a8;
+  --bg:#f8fdf9;--surface:#ffffff;
+  --t1:#0a1f12;--t2:#1e4a2a;--t3:#4a7a56;--t4:#8aad94;
+  --err:#e03535;
+  --r:18px;--rsm:11px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh}
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
+/* ═══════════ CANVAS BG ═══════════ */
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--cream);
-            color: var(--text1);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+/* ═══════════ PROGRESS BAR ═══════════ */
+#bar{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:999;
+  background:linear-gradient(90deg,var(--g4),var(--gold2),var(--g5));
+  transition:width .2s;box-shadow:0 0 12px rgba(201,162,60,.7)}
 
-        /* ───────── HERO BACKGROUND ───────── */
-        .hero-bg {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background: linear-gradient(145deg, var(--g0) 0%, var(--g2) 40%, #0a2d14 100%);
-            height: 100vh;
-        }
-        .hero-bg::before {
-            content: '';
-            position: absolute; inset: 0;
-            background:
-                radial-gradient(ellipse 70% 60% at 20% 30%, rgba(42,144,80,0.25) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 70% at 80% 10%, rgba(201,168,76,0.18) 0%, transparent 55%),
-                radial-gradient(ellipse 60% 50% at 60% 80%, rgba(13,51,25,0.6) 0%, transparent 70%);
-        }
-        .hero-bg::after {
-            content: '';
-            position: absolute; inset: 0;
-            background-image:
-                repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,0.015) 60px, rgba(255,255,255,0.015) 61px),
-                repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,0.015) 60px, rgba(255,255,255,0.015) 61px);
-        }
+/* ═══════════ WRAP ═══════════ */
+.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 18px 100px}
 
-        .orb {
-            position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.35;
-            animation: floatOrb 8s ease-in-out infinite;
-        }
-        .orb-1 { width: 300px; height: 300px; background: var(--g4); top: -80px; left: -60px; animation-delay: 0s; }
-        .orb-2 { width: 200px; height: 200px; background: var(--gold); top: 120px; right: 5%; animation-delay: -3s; opacity: 0.15; }
-        .orb-3 { width: 160px; height: 160px; background: var(--g5); top: 300px; left: 40%; animation-delay: -5s; opacity: 0.2; }
-        @keyframes floatOrb {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-20px) scale(1.05); }
-        }
+/* ═══════════ HERO ═══════════ */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 0 52px;text-align:center}
 
-        /* ───────── PROGRESS STRIP ───────── */
-        #scrollProgress {
-            position: fixed; top: 0; left: 0; height: 3px; width: 0%;
-            background: linear-gradient(90deg, var(--gold), var(--gold2));
-            z-index: 1000; transition: width 0.15s;
-            box-shadow: 0 0 10px var(--gold);
-        }
+.hero-logo{max-width:180px;margin:0 auto 32px;
+  animation:logoIn .9s cubic-bezier(.34,1.4,.64,1) both;
+  filter:drop-shadow(0 8px 32px rgba(0,0,0,.35))}
+@keyframes logoIn{from{opacity:0;transform:translateY(-30px) scale(.85)}to{opacity:1;transform:none}}
 
-        /* ───────── PAGE WRAP ───────── */
-        .page-wrap {
-            position: relative; z-index: 1;
-            max-width: 700px; margin: 0 auto;
-            padding: 0 20px 80px;
-        }
+.hero-tag{display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(14px);border-radius:50px;
+  padding:7px 18px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.7);margin-bottom:28px;
+  animation:fadeUp .7s .2s ease both}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--g6);
+  box-shadow:0 0 8px var(--g6);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-        /* ───────── HEADER ───────── */
-        .header {
-            padding: 56px 0 52px;
-            text-align: center;
-        }
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(32px,7vw,56px);font-weight:800;
+  line-height:1.07;color:#fff;margin-bottom:18px;
+  animation:fadeUp .7s .3s ease both}
+.hero-title em{font-style:italic;font-weight:400;
+  background:linear-gradient(135deg,var(--gold2),var(--gold3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:15px;color:rgba(255,255,255,.55);max-width:440px;line-height:1.75;
+  animation:fadeUp .7s .4s ease both}
 
-        .logo-pill {
-            display: inline-flex; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(12px);
-            border-radius: 50px;
-            padding: 8px 20px 8px 10px;
-            margin-bottom: 32px;
-            animation: fadeDown 0.6s ease both;
-        }
-        .logo-pill-dot {
-            width: 32px; height: 32px;
-            background: linear-gradient(135deg, var(--gold), var(--gold2));
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 15px;
-            box-shadow: 0 2px 12px rgba(201,168,76,0.5);
-        }
-        .logo-pill-text {
-            font-size: 11px; font-weight: 700;
-            letter-spacing: 0.12em; text-transform: uppercase;
-            color: rgba(255,255,255,0.75);
-        }
+.hero-stats{display:flex;gap:0;margin-top:36px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(16px);border-radius:60px;overflow:hidden;
+  animation:fadeUp .7s .5s ease both}
+.stat{padding:14px 28px;text-align:center;position:relative}
+.stat+.stat::before{content:'';position:absolute;left:0;top:20%;height:60%;width:1px;
+  background:rgba(255,255,255,.12)}
+.stat-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;display:block}
+.stat-lbl{font-size:10px;color:rgba(255,255,255,.45);font-weight:500;letter-spacing:.08em;text-transform:uppercase}
 
-        .header-logo-img {
-            max-width: 200px; width: 100%; height: auto;
-            display: block; margin: 0 auto 28px;
-            filter: drop-shadow(0 6px 24px rgba(0,0,0,0.3));
-            animation: fadeDown 0.6s 0.1s ease both;
-        }
+.scroll-cue{margin-top:48px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  animation:fadeUp .7s .6s ease both;cursor:pointer}
+.scroll-cue-text{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);font-weight:600}
+.chevron-wrap{width:36px;height:36px;border:1px solid rgba(255,255,255,.15);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;animation:bounce 2.2s infinite}
+.chevron-wrap svg{width:14px;height:14px;stroke:rgba(255,255,255,.5);fill:none;stroke-width:2;stroke-linecap:round}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 
-        .header-eyebrow {
-            font-size: 11px; font-weight: 700;
-            letter-spacing: 0.18em; text-transform: uppercase;
-            color: var(--gold2);
-            margin-bottom: 14px;
-            animation: fadeDown 0.6s 0.15s ease both;
-        }
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 
-        .header-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(30px, 6vw, 46px);
-            font-weight: 700;
-            line-height: 1.12;
-            color: #fff;
-            margin-bottom: 16px;
-            animation: fadeDown 0.6s 0.2s ease both;
-        }
-        .header-title em {
-            font-style: italic;
-            color: var(--gold2);
-        }
-        .header-sub {
-            font-size: 14px; line-height: 1.7;
-            color: rgba(255,255,255,0.6);
-            max-width: 460px; margin: 0 auto;
-            animation: fadeDown 0.6s 0.25s ease both;
-        }
+/* ═══════════ FORM AREA ═══════════ */
+.form-area{background:var(--bg);border-radius:32px 32px 0 0;padding-top:8px;
+  margin-top:-2px;position:relative;z-index:2}
 
-        .header-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(42,144,80,0.25);
-            border: 1px solid rgba(92,184,122,0.3);
-            color: var(--g6);
-            font-size: 12px; font-weight: 600;
-            padding: 6px 14px; border-radius: 50px;
-            margin-top: 20px;
-            animation: fadeDown 0.6s 0.3s ease both;
-        }
-        .badge-dot { width: 7px; height: 7px; background: var(--g6); border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+/* ═══════════ SECTION DIVIDER ═══════════ */
+.sec-head{display:flex;align-items:center;gap:14px;padding:52px 0 22px}
+.sec-circle{width:46px;height:46px;flex-shrink:0;border-radius:14px;
+  background:linear-gradient(135deg,var(--g2),var(--g4));
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:0 6px 20px rgba(15,60,32,.3);
+  transition:transform .3s}
+.sec-circle:hover{transform:rotate(-8deg) scale(1.08)}
+.sec-n{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--g5);margin-bottom:3px}
+.sec-t{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--t1)}
 
-        /* ───────── STEPS NAV ───────── */
-        .steps-nav {
-            display: flex; align-items: center; justify-content: center;
-            gap: 0; margin-bottom: 36px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            padding: 8px 12px;
-            animation: fadeDown 0.6s 0.35s ease both;
-        }
-        .step-item {
-            display: flex; align-items: center; gap: 8px;
-            padding: 6px 14px; border-radius: 50px;
-            font-size: 12px; font-weight: 600;
-            color: rgba(255,255,255,0.45);
-            transition: all 0.3s;
-            cursor: default;
-        }
-        .step-item.active {
-            background: rgba(201,168,76,0.2);
-            color: var(--gold2);
-        }
-        .step-num {
-            width: 20px; height: 20px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 800;
-            background: rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.4);
-            transition: all 0.3s;
-        }
-        .step-item.active .step-num {
-            background: var(--gold);
-            color: var(--g0);
-        }
-        .step-sep { color: rgba(255,255,255,0.2); font-size: 12px; padding: 0 4px; }
+/* ═══════════ GLASS CARDS ═══════════ */
+.card{background:var(--surface);border-radius:var(--r);padding:26px 28px;margin-bottom:14px;
+  border:1px solid rgba(200,230,210,.7);position:relative;overflow:hidden;
+  box-shadow:0 2px 16px rgba(15,60,32,.06);
+  transition:transform .25s,box-shadow .25s,border-color .25s;
+  transform-style:preserve-3d}
+.card::after{content:'';position:absolute;inset:0;border-radius:var(--r);
+  background:linear-gradient(135deg,rgba(42,148,89,.04) 0%,transparent 60%);
+  pointer-events:none;opacity:0;transition:opacity .3s}
+.card:hover{transform:translateY(-3px) perspective(800px) rotateX(.5deg);
+  box-shadow:0 12px 40px rgba(15,60,32,.12);border-color:rgba(42,148,89,.3)}
+.card:hover::after{opacity:1}
 
-        /* ───────── SECTION TRANSITIONS ───────── */
-        .form-section {
-            animation: sectionIn 0.5s ease both;
-        }
-        @keyframes sectionIn {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
+.card-shine{position:absolute;top:0;left:-150%;width:80%;height:100%;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.25) 50%,transparent 60%);
+  pointer-events:none;transition:left .55s ease;border-radius:var(--r)}
+.card:hover .card-shine{left:150%}
 
-        /* ───────── SECTION LABELS ───────── */
-        .section-header {
-            display: flex; align-items: center; gap: 14px;
-            margin: 44px 0 20px;
-        }
-        .section-icon {
-            width: 44px; height: 44px; flex-shrink: 0;
-            background: linear-gradient(135deg, var(--g3), var(--g4));
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 4px 16px rgba(13,51,25,0.35);
-        }
-        .section-meta {}
-        .section-num {
-            font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
-            text-transform: uppercase; color: var(--g5); margin-bottom: 2px;
-        }
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px; font-weight: 700; color: var(--text1);
-        }
+.intro-glass{background:linear-gradient(145deg,var(--g1),var(--g3));
+  border:none;border-radius:var(--r);padding:28px;margin-bottom:8px;position:relative;overflow:hidden}
+.intro-glass::before{content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E");
+  border-radius:var(--r)}
+.intro-glass p{font-size:14px;line-height:1.8;color:rgba(255,255,255,.72);position:relative}
+.intro-glass strong{color:var(--gold2)}
 
-        /* ───────── CARDS ───────── */
-        .card {
-            background: #fff;
-            border-radius: var(--r);
-            padding: 28px 32px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow-card);
-            border: 1.5px solid transparent;
-            transition: all 0.25s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 3px;
-            background: linear-gradient(90deg, var(--g4), var(--g5));
-            opacity: 0; transition: opacity 0.25s;
-        }
-        .card:focus-within {
-            border-color: var(--g4);
-            box-shadow: var(--shadow-lifted), 0 0 0 4px rgba(29,110,55,0.07);
-            transform: translateY(-2px);
-        }
-        .card:focus-within::before { opacity: 1; }
+.tip{background:linear-gradient(135deg,#fffbef,#fef6dc);
+  border:1px solid rgba(201,162,60,.25);border-radius:var(--rsm);
+  padding:14px 18px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px}
+.tip-ico{font-size:16px;flex-shrink:0;margin-top:2px}
+.tip-txt{font-size:12.5px;line-height:1.7;color:#6b4c00;font-weight:500}
+.tip-txt strong{color:#8b5c00}
 
-        .intro-card {
-            background: linear-gradient(135deg, var(--g2), var(--g3));
-            border-radius: var(--r);
-            padding: 28px 32px;
-            margin-bottom: 8px;
-            position: relative; overflow: hidden;
-        }
-        .intro-card::after {
-            content: '📋';
-            position: absolute; right: 20px; bottom: -10px;
-            font-size: 80px; opacity: 0.06;
-        }
-        .intro-card p {
-            font-size: 14px; line-height: 1.8;
-            color: rgba(255,255,255,0.8);
-        }
-        .intro-card strong { color: var(--gold2); }
+/* ═══════════ QUESTION ═══════════ */
+.qn{width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,var(--g3),var(--g5));color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:12px;font-weight:800;margin-bottom:14px;
+  box-shadow:0 3px 12px rgba(15,60,32,.25)}
+.qt{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.qh{font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.55}
+.req{color:var(--err)}
 
-        .tip-card {
-            background: var(--gold-pale);
-            border: 1.5px solid rgba(201,168,76,0.3);
-            border-radius: var(--r-sm);
-            padding: 14px 18px;
-            margin-bottom: 16px;
-            display: flex; align-items: flex-start; gap: 12px;
-        }
-        .tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-        .tip-text { font-size: 12px; line-height: 1.7; color: #7a5c10; font-weight: 500; }
+/* ═══════════ INPUTS ═══════════ */
+.fl-wrap{position:relative;margin-bottom:0}
+select,.fl-input,.fl-ta{
+  width:100%;font-family:'Outfit',sans-serif;font-size:14px;color:var(--t1);
+  background:#f4fbf6;border:1.5px solid #d6ead9;border-radius:var(--rsm);
+  padding:13px 16px;outline:none;transition:all .22s;-webkit-appearance:none}
+.fl-ta{resize:vertical;min-height:80px}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 4.5L11 1' stroke='%234a7a56' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;cursor:pointer}
+select:focus,.fl-input:focus,.fl-ta:focus{
+  border-color:var(--g4);background:#fff;
+  box-shadow:0 0 0 4px rgba(31,115,67,.1),0 2px 12px rgba(31,115,67,.08)}
+select:focus{box-shadow:0 0 0 4px rgba(31,115,67,.1)}
+.fl-input.err,.fl-ta.err,select.err{border-color:var(--err);animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-        /* ───────── FIELD LABELS & INPUTS ───────── */
-        .field-label {
-            font-size: 13px; font-weight: 700; color: var(--text2);
-            margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
-        }
-        .field-hint {
-            font-size: 11px; color: var(--text4);
-            margin-bottom: 10px; line-height: 1.6;
-        }
-        .req { color: var(--red); }
+/* ═══════════ CATEGORY CHIPS ═══════════ */
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.chip{display:flex;align-items:center;gap:9px;padding:11px 14px;
+  background:#f4fbf6;border:1.5px solid #d6ead9;border-radius:10px;
+  cursor:pointer;font-size:13px;font-weight:500;color:var(--t2);
+  transition:all .2s;user-select:none;position:relative;overflow:hidden}
+.chip input{display:none}
+.chip-box{width:18px;height:18px;flex-shrink:0;border:2px solid #bcd6c4;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chip-box svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5;
+  stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.5);transition:all .2s}
+.chip input:checked~.chip-box{background:var(--g4);border-color:var(--g4)}
+.chip input:checked~.chip-box svg{opacity:1;transform:scale(1)}
+.chip:has(input:checked){background:#e8f6ed;border-color:var(--g4);color:var(--g2);font-weight:600;
+  box-shadow:0 2px 12px rgba(31,115,67,.12)}
+.chip:hover:not(:has(input:checked)){background:#eef8f2;border-color:#b0d4ba}
+.chip-ripple{position:absolute;border-radius:50%;background:rgba(31,115,67,.15);
+  transform:scale(0);animation:ripple .5s ease-out;pointer-events:none}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
 
-        select, input[type=text], textarea {
-            width: 100%;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 14px;
-            background: var(--g-ghost);
-            border: 1.5px solid #ddeee1;
-            border-radius: var(--r-sm);
-            padding: 12px 16px;
-            outline: none;
-            color: var(--text1);
-            transition: all 0.2s;
-            -webkit-appearance: none;
-        }
-        select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a7d63' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; cursor: pointer; }
-        select:focus, input:focus, textarea:focus {
-            border-color: var(--g4);
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(29,110,55,0.08);
-        }
-        textarea { resize: vertical; min-height: 80px; }
+/* ═══════════ PAIRS ═══════════ */
+.pairs-shell{background:#fff;border-radius:var(--r);padding:26px 28px;
+  border:1px solid rgba(200,230,210,.7);
+  box-shadow:0 2px 16px rgba(15,60,32,.06);margin-bottom:14px}
+.pairs-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.pairs-ttl{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;
+  display:flex;align-items:center;gap:10px}
+.pairs-ico{width:36px;height:36px;background:linear-gradient(135deg,var(--g2),var(--g4));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.pairs-ctr{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);
+  background:#f4fbf6;padding:4px 12px;border-radius:50px;border:1px solid #d6ead9}
 
-        /* ───────── Q NUMBER ───────── */
-        .q-number {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 30px; height: 30px;
-            background: linear-gradient(135deg, var(--g3), var(--g4));
-            color: #fff; border-radius: 50%;
-            font-size: 12px; font-weight: 800;
-            margin-bottom: 14px;
-            box-shadow: 0 2px 10px rgba(13,51,25,0.3);
-        }
-        .q-text { font-size: 15px; font-weight: 700; color: var(--text1); margin-bottom: 4px; }
-        .q-hint { font-size: 12px; color: var(--text3); margin-bottom: 14px; line-height: 1.5; }
+.pair-item{background:#f8fdfb;border:1.5px solid #daeee1;border-radius:14px;
+  padding:20px;margin-top:18px;position:relative;
+  transition:all .25s;animation:pairIn .45s cubic-bezier(.34,1.3,.64,1) both}
+@keyframes pairIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+.pair-item:focus-within{border-color:var(--g4);background:#fff;box-shadow:0 4px 20px rgba(31,115,67,.08)}
 
-        /* ───────── CATEGORY GRID ───────── */
-        .cat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        .cat-option {
-            display: flex; align-items: center; gap: 10px;
-            padding: 12px 14px;
-            background: var(--g-ghost);
-            border: 1.5px solid #ddeee1;
-            border-radius: var(--r-sm);
-            cursor: pointer;
-            font-size: 13px; font-weight: 500;
-            transition: all 0.18s;
-            user-select: none;
-        }
-        .cat-option input { display: none; }
-        .cat-check {
-            width: 20px; height: 20px; flex-shrink: 0;
-            border: 2px solid #c2d8c8; border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; color: transparent;
-            transition: all 0.18s;
-        }
-        .cat-option:has(input:checked) .cat-check {
-            background: var(--g4); border-color: var(--g4); color: #fff;
-        }
-        .cat-option:has(input:checked) {
-            border-color: var(--g4); background: #e8f5ec;
-            color: var(--g3); font-weight: 700;
-            box-shadow: 0 2px 12px rgba(29,110,55,0.1);
-        }
-        .cat-option:hover { border-color: var(--g5); background: #f0f9f3; }
-        .cat-emoji { font-size: 16px; }
+.pair-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.pair-badge{background:linear-gradient(135deg,var(--g3),var(--g4));color:#fff;
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;
+  padding:4px 13px;border-radius:50px;display:flex;align-items:center;gap:6px}
+.pair-badge svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.pair-field{margin-bottom:14px}
+.pair-field:last-child{margin-bottom:0}
+.pfl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);
+  margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.pfh{font-size:11.5px;color:var(--t4);margin-bottom:7px;line-height:1.55;font-style:italic}
 
-        /* ───────── PAIR CONTAINER ───────── */
-        .pairs-wrapper {
-            background: #fff;
-            border-radius: var(--r);
-            padding: 28px 32px;
-            box-shadow: var(--shadow-card);
-            border: 1.5px solid #e5f0e8;
-            margin-bottom: 16px;
-        }
-        .pairs-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .pairs-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 17px; font-weight: 700; color: var(--text1);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .pairs-title-icon {
-            width: 34px; height: 34px;
-            background: linear-gradient(135deg, var(--g3), var(--g4));
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-        }
-        .pairs-count {
-            font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-            text-transform: uppercase; color: var(--text4);
-        }
+.rm-btn{background:rgba(224,53,53,.06);border:1px solid rgba(224,53,53,.18);
+  color:var(--err);font-size:11px;font-weight:700;letter-spacing:.04em;padding:5px 13px;
+  border-radius:50px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:5px}
+.rm-btn:hover{background:rgba(224,53,53,.12);border-color:rgba(224,53,53,.35)}
+.rm-btn svg{width:10px;height:10px;stroke:var(--err);fill:none;stroke-width:2.5;stroke-linecap:round}
 
-        .pair-card {
-            background: var(--g-ghost);
-            border-radius: var(--r-sm);
-            padding: 20px;
-            margin-top: 20px;
-            border: 1.5px solid #ddeee1;
-            position: relative;
-            transition: all 0.2s;
-        }
-        .pair-card:focus-within {
-            border-color: var(--g4);
-            background: #fff;
-            box-shadow: 0 4px 20px rgba(29,110,55,0.08);
-        }
+.add-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+  margin-top:20px;padding:14px;background:none;
+  border:2px dashed #c5dfc9;border-radius:12px;cursor:pointer;
+  font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:var(--t3);
+  transition:all .22s}
+.add-btn:hover{border-color:var(--g4);color:var(--g3);background:#f0f9f3}
+.add-icon{width:26px;height:26px;background:#e8f5ed;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;transition:all .22s}
+.add-icon svg{width:12px;height:12px;stroke:var(--g4);fill:none;stroke-width:2.5;stroke-linecap:round}
+.add-btn:hover .add-icon{background:var(--g4)}
+.add-btn:hover .add-icon svg{stroke:#fff}
 
-        .pair-card-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 16px;
-        }
-        .pair-num-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: linear-gradient(135deg, var(--g3), var(--g4));
-            color: #fff;
-            font-size: 11px; font-weight: 800;
-            letter-spacing: 0.08em; text-transform: uppercase;
-            padding: 4px 12px; border-radius: 50px;
-        }
-        .pair-field { margin-bottom: 14px; }
-        .pair-field:last-child { margin-bottom: 0; }
-        .pair-field-label {
-            font-size: 11px; font-weight: 800;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            color: var(--text3); margin-bottom: 6px;
-            display: flex; align-items: center; gap: 6px;
-        }
+/* ═══════════ SUBMIT ═══════════ */
+.sub-zone{text-align:center;padding:20px 0 0}
+.sub-btn{display:inline-flex;align-items:center;gap:14px;
+  background:linear-gradient(135deg,var(--g2) 0%,var(--g4) 50%,var(--g3) 100%);
+  background-size:200% 200%;color:#fff;border:none;border-radius:60px;
+  padding:18px 54px;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+  cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(15,60,32,.3),0 0 0 0 rgba(42,148,89,.4);
+  transition:all .3s;animation:gradShift 4s ease infinite}
+@keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.sub-btn::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+  border-radius:60px;pointer-events:none}
+.sub-btn::after{content:'';position:absolute;top:-50%;left:-60%;width:200%;height:200%;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.18) 50%,transparent 65%);
+  transform:rotate(0deg);transition:left .6s ease;pointer-events:none}
+.sub-btn:hover::after{left:100%}
+.sub-btn:hover{transform:translateY(-4px);
+  box-shadow:0 16px 48px rgba(15,60,32,.4),0 0 0 8px rgba(42,148,89,.12)}
+.sub-btn:active{transform:translateY(-1px)}
+.sub-btn:disabled{background:#b0c9b8;cursor:not-allowed;transform:none;box-shadow:none}
+.sub-ico{width:38px;height:38px;background:rgba(255,255,255,.18);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:17px}
+.sub-note{font-size:12px;color:var(--t4);margin-top:14px;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+.lock-ico{width:13px;height:13px;stroke:var(--t4);fill:none;stroke-width:2;stroke-linecap:round}
 
-        .remove-btn {
-            background: rgba(224,62,62,0.08);
-            border: 1px solid rgba(224,62,62,0.2);
-            color: var(--red); font-size: 11px; font-weight: 700;
-            padding: 5px 12px; border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.18s;
-            letter-spacing: 0.04em;
-        }
-        .remove-btn:hover { background: rgba(224,62,62,0.15); }
+/* ═══════════ REVEAL ═══════════ */
+.rv{opacity:0;transform:translateY(28px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.34,1.1,.64,1)}
+.rv.in{opacity:1;transform:none}
 
-        .add-btn {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            width: 100%; margin-top: 20px;
-            padding: 14px 24px;
-            background: none;
-            border: 2px dashed #c2d8c8;
-            border-radius: var(--r-sm);
-            color: var(--text3);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 13px; font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .add-btn:hover {
-            border-color: var(--g4); color: var(--g3);
-            background: var(--g-ghost);
-        }
-        .add-btn-icon {
-            width: 24px; height: 24px;
-            background: var(--g-pale);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 800; color: var(--g4);
-            transition: all 0.2s;
-        }
-        .add-btn:hover .add-btn-icon { background: var(--g4); color: #fff; }
+/* ═══════════ SUCCESS ═══════════ */
+#suc{display:none}
+.suc-card{background:#fff;border-radius:24px;padding:56px 40px;text-align:center;
+  border:1px solid rgba(200,230,210,.7);box-shadow:0 20px 60px rgba(15,60,32,.12);
+  position:relative;overflow:hidden;animation:fadeUp .6s ease}
+.suc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--g3),var(--g5),var(--gold))}
+.suc-ring{width:96px;height:96px;border-radius:50%;margin:0 auto 28px;
+  background:linear-gradient(135deg,var(--g3),var(--g5));
+  display:flex;align-items:center;justify-content:center;font-size:42px;
+  box-shadow:0 8px 36px rgba(15,60,32,.25);animation:popIn .7s .2s cubic-bezier(.34,1.5,.64,1) both}
+@keyframes popIn{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+.suc-t{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;margin-bottom:10px}
+.suc-wa{background:#f0fdf4;border:1.5px solid rgba(37,211,102,.25);border-radius:14px;
+  padding:20px 24px;margin:20px 0 0;text-align:left}
+.suc-wa-t{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#14532d;
+  margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.suc-wa ol{padding-left:18px}
+.suc-wa li{font-size:13px;line-height:2.3;color:#166534;font-weight:500}
+.suc-foot{display:inline-flex;align-items:center;gap:8px;background:#eaf5ed;
+  padding:10px 22px;border-radius:50px;font-size:13px;font-weight:700;color:var(--g3);margin-top:24px}
 
-        /* ───────── SUBMIT SECTION ───────── */
-        .submit-area {
-            text-align: center;
-            padding: 12px 0 0;
-        }
-        .submit-btn {
-            display: inline-flex; align-items: center; gap: 12px;
-            background: linear-gradient(135deg, var(--g3) 0%, var(--g4) 50%, var(--g5) 100%);
-            color: #fff;
-            border: none;
-            border-radius: 50px;
-            padding: 18px 52px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 16px; font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(13,51,25,0.35);
-            transition: all 0.25s;
-            letter-spacing: 0.02em;
-            position: relative; overflow: hidden;
-        }
-        .submit-btn::before {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
-            border-radius: 50px;
-        }
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 16px 48px rgba(13,51,25,0.4);
-        }
-        .submit-btn:active { transform: translateY(-1px); }
-        .submit-btn:disabled {
-            background: #b0c8b7; cursor: not-allowed;
-            transform: none; box-shadow: none;
-        }
-        .submit-icon {
-            width: 36px; height: 36px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-        }
-        .submit-subtext {
-            font-size: 12px; color: var(--text4); margin-top: 12px;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-
-        /* ───────── FLOATING PARTICLES ───────── */
-        .leaf {
-            position: fixed;
-            font-size: 20px;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.05;
-            animation: leafFloat linear infinite;
-        }
-        @keyframes leafFloat {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.06; }
-            90% { opacity: 0.06; }
-            100% { transform: translateY(-20px) rotate(360deg); opacity: 0; }
-        }
-
-        /* ───────── SUCCESS SCREEN ───────── */
-        #successScreen {
-            display: none;
-            animation: fadeIn 0.6s ease both;
-        }
-        .success-card {
-            background: #fff;
-            border-radius: var(--r);
-            padding: 56px 40px;
-            text-align: center;
-            box-shadow: var(--shadow-lifted);
-            border: 1.5px solid #ddeee1;
-            position: relative; overflow: hidden;
-        }
-        .success-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 5px;
-            background: linear-gradient(90deg, var(--g3), var(--g5), var(--gold));
-        }
-        .success-icon-wrap {
-            width: 90px; height: 90px;
-            background: linear-gradient(135deg, var(--g3), var(--g5));
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 40px;
-            margin: 0 auto 28px;
-            box-shadow: 0 8px 32px rgba(13,51,25,0.25);
-            animation: bounceIn 0.6s 0.2s ease both;
-        }
-        @keyframes bounceIn {
-            0% { transform: scale(0); opacity: 0; }
-            70% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .success-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 32px; font-weight: 700;
-            color: var(--text1); margin-bottom: 12px;
-        }
-        .success-steps {
-            background: #f0fdf4;
-            border: 1.5px solid rgba(37,211,102,0.25);
-            border-radius: var(--r-sm);
-            padding: 20px 24px;
-            margin: 20px 0 0;
-            text-align: left;
-        }
-        .success-steps-title {
-            font-size: 13px; font-weight: 800;
-            color: #14532d; margin-bottom: 12px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .success-steps ol {
-            padding-left: 18px; margin: 0;
-        }
-        .success-steps li {
-            font-size: 13px; line-height: 2.2;
-            color: #166534; font-weight: 500;
-        }
-        .success-footer {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: var(--g-pale);
-            padding: 10px 20px; border-radius: 50px;
-            font-size: 13px; font-weight: 700; color: var(--g3);
-            margin-top: 24px;
-        }
-
-        /* ───────── CATEGORY SELECT IN PAIRS ───────── */
-        .cat-select-wrapper {
-            position: relative;
-        }
-
-        /* ───────── SCROLL REVEAL ───────── */
-        .reveal {
-            opacity: 0; transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        .reveal.visible { opacity: 1; transform: none; }
-
-        /* ───────── ANIMATIONS ───────── */
-        @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-16px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; } to { opacity: 1; }
-        }
-
-        /* ───────── RESPONSIVE ───────── */
-        @media (max-width: 520px) {
-            .cat-grid { grid-template-columns: repeat(2, 1fr); }
-            .card, .pairs-wrapper { padding: 22px 20px; }
-            .header { padding: 40px 0 36px; }
-            .submit-btn { padding: 16px 36px; font-size: 15px; }
-        }
-        @media (max-width: 360px) {
-            .cat-grid { grid-template-columns: 1fr; }
-            .steps-nav { gap: 0; padding: 6px 8px; }
-            .step-item { padding: 5px 8px; font-size: 10px; }
-        }
-    </style>
+/* ═══════════ RESPONSIVE ═══════════ */
+@media(max-width:520px){
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .hero-stats{flex-direction:column;border-radius:18px}
+  .stat+.stat::before{display:none}
+  .card,.pairs-shell{padding:20px 18px}
+}
+@media(max-width:360px){.chips{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
-<div id="scrollProgress"></div>
+<canvas id="bgCanvas"></canvas>
+<div id="bar"></div>
 
-<!-- Hero background -->
-<div class="hero-bg">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-</div>
+<div class="wrap">
 
-<!-- Floating leaves -->
-<div class="leaf" style="left:8%;animation-duration:18s;animation-delay:0s;">🌿</div>
-<div class="leaf" style="left:22%;animation-duration:22s;animation-delay:-5s;">🍃</div>
-<div class="leaf" style="left:55%;animation-duration:15s;animation-delay:-9s;">🌿</div>
-<div class="leaf" style="left:78%;animation-duration:20s;animation-delay:-2s;">🍃</div>
-<div class="leaf" style="left:92%;animation-duration:25s;animation-delay:-14s;">🌿</div>
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <img class="hero-logo" src="logo.png" alt="Municipalidad Distrital de Pangoa">
 
-<div class="page-wrap">
+  <div class="hero-tag">
+    <div class="live-dot"></div>
+    Subgerencia de Rentas · Pangoa
+  </div>
 
-    <!-- ── HEADER ── -->
-    <div class="header">
-        <img class="header-logo-img" src="logo.png" alt="Municipalidad Distrital de Pangoa">
+  <h1 class="hero-title">
+    Encuesta para el<br>
+    <em>Asistente Tributario</em><br>Virtual
+  </h1>
+  <p class="hero-sub">Tu conocimiento en ventanilla es el motor de nuestra IA. Cada caso que compartes mejora la atención a todos los ciudadanos.</p>
 
-        <div class="logo-pill">
-            <div class="logo-pill-dot">🏛️</div>
-            <span class="logo-pill-text">Municipalidad Distrital de Pangoa</span>
-        </div>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">5 min</span><span class="stat-lbl">Duración</span></div>
+    <div class="stat"><span class="stat-num">100%</span><span class="stat-lbl">Anónimo</span></div>
+    <div class="stat"><span class="stat-num">4</span><span class="stat-lbl">Secciones</span></div>
+  </div>
 
-        <p class="header-eyebrow">Subgerencia de Rentas y Orientación Tributaria</p>
-        <h1 class="header-title">Encuesta para el<br><em>Asistente Tributario Virtual</em></h1>
-        <p class="header-sub">Tu experiencia es la base de nuestra inteligencia artificial. Ayúdanos a responder mejor a cada ciudadano.</p>
-        <div class="header-badge">
-            <div class="badge-dot"></div>
-            Formulario anónimo · Solo toma 5 minutos
-        </div>
+  <div class="scroll-cue" onclick="document.getElementById('formStart').scrollIntoView({behavior:'smooth'})">
+    <span class="scroll-cue-text">Comenzar</span>
+    <div class="chevron-wrap">
+      <svg viewBox="0 0 14 8"><path d="M1 1l6 6 6-6"/></svg>
+    </div>
+  </div>
+</section>
 
-        <!-- Steps indicator -->
-        <div class="steps-nav" style="margin-top:28px;">
-            <div class="step-item active"><div class="step-num">1</div><span>Datos</span></div>
-            <div class="step-sep">›</div>
-            <div class="step-item"><div class="step-num">2</div><span>Temas</span></div>
-            <div class="step-sep">›</div>
-            <div class="step-item"><div class="step-num">3</div><span>Casos</span></div>
-            <div class="step-sep">›</div>
-            <div class="step-item"><div class="step-num">4</div><span>Extra</span></div>
-        </div>
+<!-- ═══ FORM ═══ -->
+<div class="form-area" id="formStart">
+
+  <div class="intro-glass rv">
+    <p>Este formulario recopila <strong>preguntas y respuestas reales</strong> de ventanilla para entrenar el asistente de IA de rentas. Cuantos más casos compartas, más preciso y útil será el sistema.</p>
+  </div>
+
+  <div id="formSection">
+  <form id="encuestaForm" novalidate>
+
+    <!-- ── S1 ── -->
+    <div class="sec-head rv">
+      <div class="sec-circle">👤</div>
+      <div><div class="sec-n">Sección 1 de 4</div><div class="sec-t">Datos del trabajador</div></div>
     </div>
 
-    <!-- ── FORM SECTION ── -->
-    <div id="formSection">
-
-        <!-- Intro -->
-        <div class="intro-card reveal">
-            <p>Este formulario recopila <strong>casos reales</strong> de consultas tributarias para entrenar el asistente de IA. Cuantos más ejemplos compartas, más preciso será el sistema automatizado de rentas.</p>
-        </div>
-
-        <form id="encuestaForm" novalidate>
-
-            <!-- ─── SECCIÓN 1 ─── -->
-            <div class="section-header reveal">
-                <div class="section-icon">👤</div>
-                <div class="section-meta">
-                    <div class="section-num">Sección 1 de 4</div>
-                    <div class="section-title">Datos del trabajador</div>
-                </div>
-            </div>
-
-            <div class="tip-card reveal">
-                <div class="tip-icon">💡</div>
-                <div class="tip-text">Esta información es <strong>anónima</strong> y solo se usa para organizar las respuestas por área. No se almacena ningún dato personal.</div>
-            </div>
-
-            <div class="card reveal">
-                <div class="q-number">1</div>
-                <div class="q-text">¿En qué área trabajas? <span class="req">*</span></div>
-                <div class="q-hint">Selecciona la unidad donde realizas tus funciones diarias.</div>
-                <select id="area" required>
-                    <option value="">— Selecciona tu área —</option>
-                    <option>Ventanilla de atención</option>
-                    <option>Fiscalización tributaria</option>
-                    <option>Cobranza y recuperación</option>
-                    <option>Orientación y asesoría</option>
-                    <option>Caja / Recaudación</option>
-                    <option>Otro</option>
-                </select>
-            </div>
-
-            <div class="card reveal">
-                <div class="q-number">2</div>
-                <div class="q-text">Experiencia en el área</div>
-                <div class="q-hint">Opcional — nos ayuda a entender el perfil de quienes responden.</div>
-                <select id="experiencia">
-                    <option value="">— Selecciona —</option>
-                    <option>Menos de 1 año</option>
-                    <option>1 a 2 años</option>
-                    <option>3 a 5 años</option>
-                    <option>Más de 5 años</option>
-                </select>
-            </div>
-
-            <!-- ─── SECCIÓN 2 ─── -->
-            <div class="section-header reveal" style="margin-top:52px;">
-                <div class="section-icon">📊</div>
-                <div class="section-meta">
-                    <div class="section-num">Sección 2 de 4</div>
-                    <div class="section-title">Temas frecuentes</div>
-                </div>
-            </div>
-
-            <div class="card reveal">
-                <div class="q-number">3</div>
-                <div class="q-text">¿Sobre qué temas te preguntan más los ciudadanos? <span class="req">*</span></div>
-                <div class="q-hint">Puedes seleccionar varios. Marca todos los que apliquen en tu área de trabajo.</div>
-                <div class="cat-grid">
-                    <label class="cat-option"><input type="checkbox" name="temas" value="pagos"><div class="cat-check">✓</div><span class="cat-emoji">💳</span> Pagos</label>
-                    <label class="cat-option"><input type="checkbox" name="temas" value="deudas"><div class="cat-check">✓</div><span class="cat-emoji">📋</span> Deudas</label>
-                    <label class="cat-option"><input type="checkbox" name="temas" value="multas"><div class="cat-check">✓</div><span class="cat-emoji">⚠️</span> Multas</label>
-                    <label class="cat-option"><input type="checkbox" name="temas" value="fraccionamiento"><div class="cat-check">✓</div><span class="cat-emoji">🗓️</span> Fraccionamiento</label>
-                    <label class="cat-option"><input type="checkbox" name="temas" value="predios"><div class="cat-check">✓</div><span class="cat-emoji">🏠</span> Predios</label>
-                    <label class="cat-option"><input type="checkbox" name="temas" value="otros"><div class="cat-check">✓</div><span class="cat-emoji">➕</span> Otros</label>
-                </div>
-            </div>
-
-            <!-- ─── SECCIÓN 3 ─── -->
-            <div class="section-header reveal" style="margin-top:52px;">
-                <div class="section-icon">💬</div>
-                <div class="section-meta">
-                    <div class="section-num">Sección 3 de 4</div>
-                    <div class="section-title">Preguntas y respuestas reales</div>
-                </div>
-            </div>
-
-            <div class="tip-card reveal">
-                <div class="tip-icon">🎯</div>
-                <div class="tip-text">
-                    <strong>¿Cómo rellenar esta sección?</strong> Escribe exactamente como los ciudadanos preguntan y cómo tú respondes en ventanilla. Cuanto más natural sea el lenguaje, mejor aprende la IA. Puedes agregar varios casos.
-                </div>
-            </div>
-
-            <div class="pairs-wrapper reveal">
-                <div class="pairs-header">
-                    <div class="pairs-title">
-                        <div class="pairs-title-icon">💬</div>
-                        Casos reales
-                    </div>
-                    <span class="pairs-count" id="pairsCountLabel">1 caso</span>
-                </div>
-
-                <div id="pairsContainer">
-                    <div class="pair-card" id="pair-1">
-                        <div class="pair-card-header">
-                            <div class="pair-num-badge">✏️ Caso #1</div>
-                        </div>
-
-                        <div class="pair-field">
-                            <div class="pair-field-label">❓ Pregunta del ciudadano <span class="req">*</span></div>
-                            <div class="field-hint">Escribe la pregunta tal como la dice el ciudadano, sin corregir el lenguaje.</div>
-                            <textarea name="pregunta[]" rows="2" placeholder='Ej: "¿Cuánto debo de predial?" · "¿Por qué me llegó esta multa?"'></textarea>
-                        </div>
-
-                        <div class="pair-field">
-                            <div class="pair-field-label">💬 Tu respuesta oficial <span class="req">*</span></div>
-                            <div class="field-hint">Escribe la respuesta que tú das o deberías dar en ventanilla.</div>
-                            <textarea name="respuesta[]" rows="3" placeholder='Ej: "Le indico que su deuda de predial del año 2024 es de S/ 180.00. Puede cancelar en caja o de manera virtual en..."'></textarea>
-                        </div>
-
-                        <div class="pair-field">
-                            <div class="pair-field-label">🏷️ Categoría del caso <span class="req">*</span></div>
-                            <div class="field-hint">Clasifica esta consulta para organizar el entrenamiento de la IA.</div>
-                            <div class="cat-select-wrapper">
-                                <select name="categoria[]">
-                                    <option value="otros">Otros</option>
-                                    <option value="pagos">💳 Pagos</option>
-                                    <option value="deudas">📋 Deudas</option>
-                                    <option value="multas">⚠️ Multas</option>
-                                    <option value="fraccionamiento">🗓️ Fraccionamiento</option>
-                                    <option value="predios">🏠 Predios</option>
-                                    <option value="plazos">📅 Plazos</option>
-                                    <option value="descuentos">🎁 Descuentos</option>
-                                    <option value="tramites">📄 Trámites</option>
-                                    <option value="horarios">🕐 Horarios</option>
-                                    <option value="ubicacion">📍 Ubicación</option>
-                                    <option value="arbitrios">🏙️ Arbitrios</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="pair-field">
-                            <div class="pair-field-label">🔄 Otras formas de hacer la misma pregunta</div>
-                            <div class="field-hint">Opcional · Separa cada variante con punto y coma (;) · Ej: <em>¿Cuánto debo?; ¿Tengo deuda?; cuánto me falta pagar</em></div>
-                            <textarea name="variantes[]" rows="2" placeholder="¿Cuánto debo?; ¿Tengo deudas pendientes?; necesito saber mi deuda"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="button" class="add-btn" id="addPairBtn">
-                    <div class="add-btn-icon">+</div>
-                    Agregar otro caso
-                </button>
-            </div>
-
-            <!-- ─── SECCIÓN 4 ─── -->
-            <div class="section-header reveal" style="margin-top:52px;">
-                <div class="section-icon">✨</div>
-                <div class="section-meta">
-                    <div class="section-num">Sección 4 de 4</div>
-                    <div class="section-title">Comentarios adicionales</div>
-                </div>
-            </div>
-
-            <div class="card reveal">
-                <div class="q-number">4</div>
-                <div class="q-text">¿Tienes sugerencias para el asistente virtual?</div>
-                <div class="q-hint">Opcional — comparte qué situaciones debería manejar mejor el asistente, qué le falta o cualquier idea que se te ocurra.</div>
-                <textarea id="sugerencias" rows="4" placeholder="Ej: Debería saber cómo explicar el fraccionamiento de deudas, o tener respuestas sobre los horarios de atención..."></textarea>
-            </div>
-
-            <!-- ─── SUBMIT ─── -->
-            <div class="submit-area reveal">
-                <button type="submit" id="btnSubmit" class="submit-btn">
-                    <div class="submit-icon">✉️</div>
-                    Enviar mis respuestas
-                </button>
-                <div class="submit-subtext">
-                    🔒 Anónimo · Los datos solo se usan para entrenar la IA
-                </div>
-            </div>
-
-        </form>
+    <div class="tip rv">
+      <div class="tip-ico">🔐</div>
+      <div class="tip-txt">Información <strong>completamente anónima</strong>. Solo se usa para clasificar las respuestas por área y no se almacena ningún dato personal.</div>
     </div>
 
-    <!-- ── SUCCESS SCREEN ── -->
-    <div id="successScreen">
-        <div class="success-card">
-            <div class="success-icon-wrap">✅</div>
-            <h2 class="success-title">¡Gracias por tu aporte!</h2>
-            <p id="successMsg" style="color:var(--text3);font-size:14px;line-height:1.7;margin-top:8px;"></p>
-            <div class="success-footer">🏛️ Municipalidad Distrital de Pangoa</div>
-        </div>
+    <div class="card rv">
+      <div class="card-shine"></div>
+      <div class="qn">1</div>
+      <div class="qt">¿En qué área trabajas? <span class="req">*</span></div>
+      <div class="qh">Selecciona la unidad donde realizas tus funciones diarias.</div>
+      <select id="area" required>
+        <option value="">— Selecciona tu área —</option>
+        <option>Ventanilla de atención</option>
+        <option>Fiscalización tributaria</option>
+        <option>Cobranza y recuperación</option>
+        <option>Orientación y asesoría</option>
+        <option>Caja / Recaudación</option>
+        <option>Otro</option>
+      </select>
     </div>
 
-</div>
+    <div class="card rv">
+      <div class="card-shine"></div>
+      <div class="qn">2</div>
+      <div class="qt">Experiencia en el área</div>
+      <div class="qh">Opcional — nos ayuda a entender el perfil de quienes responden.</div>
+      <select id="experiencia">
+        <option value="">— Selecciona —</option>
+        <option>Menos de 1 año</option>
+        <option>1 a 2 años</option>
+        <option>3 a 5 años</option>
+        <option>Más de 5 años</option>
+      </select>
+    </div>
+
+    <!-- ── S2 ── -->
+    <div class="sec-head rv">
+      <div class="sec-circle">📊</div>
+      <div><div class="sec-n">Sección 2 de 4</div><div class="sec-t">Temas frecuentes</div></div>
+    </div>
+
+    <div class="card rv">
+      <div class="card-shine"></div>
+      <div class="qn">3</div>
+      <div class="qt">¿Sobre qué temas preguntan más los ciudadanos? <span class="req">*</span></div>
+      <div class="qh">Marca todos los que apliquen. Puedes seleccionar varios.</div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" name="temas" value="pagos">
+          <div class="chip-box"><svg viewBox="0 0 10 8"><path d="M1 4l3 3 5-6"/></svg></div>💳 Pagos</label>
+        <label class="chip"><input type="checkbox" name="temas" value="deudas">
+          <div class="chip-box"><svg viewBox="0 0 10 8"><path d="M1 4l3 3 5-6"/></svg></div>📋 Deudas</label>
+        <label class="chip"><input type="checkbox" name="temas" value="multas">
+          <div class="chip-box"><svg viewBox="0 0 10 8"><path d="M1 4l3 3 5-6"/></svg></div>⚠️ Multas</label>
+        <label class="chip"><input type="checkbox" name="temas" value="fraccionamiento">
+          <div class="chip-box"><svg viewBox="0 0 10 8"><path d="M1 4l3 3 5-6"/></svg></div>🗓️ Fraccionamiento</label>
+        <label class="chip"><input type="checkbox" name="temas" value="predios">
+          <div class="chip-box"><svg viewBox="0 0 10 8"><path d="M1 4l3 3 5-6"/></svg></div>🏠 Predios</label>
+        <label class="chip"><input type="checkbox" name="temas" value="otros">
+          <div class="chip-box"><svg viewBox="0 0 10 8"><path d="M1 4l3 3 5-6"/></svg></div>➕ Otros</label>
+      </div>
+    </div>
+
+    <!-- ── S3 ── -->
+    <div class="sec-head rv">
+      <div class="sec-circle">💬</div>
+      <div><div class="sec-n">Sección 3 de 4</div><div class="sec-t">Preguntas y respuestas reales</div></div>
+    </div>
+
+    <div class="tip rv">
+      <div class="tip-ico">🎯</div>
+      <div class="tip-txt"><strong>¿Cómo rellenar esta sección?</strong> Escribe exactamente como habla el ciudadano en ventanilla y cómo tú respondes. Cuanto más natural sea el lenguaje, mejor aprende la IA. Agrega cuantos casos quieras.</div>
+    </div>
+
+    <div class="pairs-shell rv">
+      <div class="pairs-top">
+        <div class="pairs-ttl"><div class="pairs-ico">💬</div>Casos reales</div>
+        <div class="pairs-ctr" id="ctrLbl">1 caso</div>
+      </div>
+
+      <div id="pairsContainer">
+        <div class="pair-item" id="pair-1">
+          <div class="pair-hd">
+            <div class="pair-badge">
+              <svg viewBox="0 0 10 10"><path d="M1 9l1.5-4.5L7 1l2 2-4.5 4.5z"/><path d="M6 2l2 2"/></svg>
+              Caso #1
+            </div>
+          </div>
+
+          <div class="pair-field">
+            <div class="pfl">❓ Pregunta del ciudadano <span class="req">*</span></div>
+            <div class="pfh">Escribe la pregunta tal como la dice, sin corregir el lenguaje.</div>
+            <textarea class="fl-ta" name="pregunta[]" rows="2" placeholder='"¿Cuánto debo de predial?" · "¿Por qué me llegó esta multa?" · "¿Cómo puedo fraccionar?"'></textarea>
+          </div>
+
+          <div class="pair-field">
+            <div class="pfl">💬 Tu respuesta oficial <span class="req">*</span></div>
+            <div class="pfh">Escribe la respuesta que das o deberías dar en ventanilla.</div>
+            <textarea class="fl-ta" name="respuesta[]" rows="3" placeholder='"Le indico que su deuda de predial 2024 es de S/ 180. Puede cancelar en caja o virtualmente en..."'></textarea>
+          </div>
+
+          <div class="pair-field">
+            <div class="pfl">🏷️ Categoría <span class="req">*</span></div>
+            <div class="pfh">Clasifica esta consulta para el entrenamiento de la IA.</div>
+            <select name="categoria[]">
+              <option value="otros">Otros</option>
+              <option value="pagos">💳 Pagos</option>
+              <option value="deudas">📋 Deudas</option>
+              <option value="multas">⚠️ Multas</option>
+              <option value="fraccionamiento">🗓️ Fraccionamiento</option>
+              <option value="predios">🏠 Predios</option>
+              <option value="plazos">📅 Plazos</option>
+              <option value="descuentos">🎁 Descuentos</option>
+              <option value="tramites">📄 Trámites</option>
+              <option value="horarios">🕐 Horarios</option>
+              <option value="ubicacion">📍 Ubicación</option>
+              <option value="arbitrios">🏙️ Arbitrios</option>
+            </select>
+          </div>
+
+          <div class="pair-field">
+            <div class="pfl">🔄 Otras formas de hacer la misma pregunta</div>
+            <div class="pfh">Opcional · Separa con punto y coma (;) · Ej: ¿Cuánto debo?; ¿Tengo deuda?; cuánto me falta pagar</div>
+            <textarea class="fl-ta" name="variantes[]" rows="2" placeholder="¿Cuánto debo?; ¿Tengo deudas pendientes?; necesito saber mi deuda"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="add-btn" id="addBtn">
+        <div class="add-icon"><svg viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg></div>
+        Agregar otro caso
+      </button>
+    </div>
+
+    <!-- ── S4 ── -->
+    <div class="sec-head rv">
+      <div class="sec-circle">✨</div>
+      <div><div class="sec-n">Sección 4 de 4</div><div class="sec-t">Comentarios adicionales</div></div>
+    </div>
+
+    <div class="card rv">
+      <div class="card-shine"></div>
+      <div class="qn">4</div>
+      <div class="qt">¿Tienes sugerencias para el asistente virtual?</div>
+      <div class="qh">Opcional — ¿qué situaciones debería manejar mejor? ¿Qué le falta? Cualquier idea es bienvenida.</div>
+      <textarea class="fl-ta" id="sugerencias" rows="4" placeholder="Ej: Debería saber cómo explicar el fraccionamiento, o tener respuestas sobre horarios de atención..."></textarea>
+    </div>
+
+    <!-- ── SUBMIT ── -->
+    <div class="sub-zone rv">
+      <button type="submit" id="subBtn" class="sub-btn">
+        <div class="sub-ico">✉️</div>
+        Enviar mis respuestas
+      </button>
+      <div class="sub-note">
+        <svg class="lock-ico" viewBox="0 0 13 14"><rect x="1" y="6" width="11" height="8" rx="2"/><path d="M4 6V4a2.5 2.5 0 015 0v2"/></svg>
+        Anónimo · Solo para entrenar la IA
+      </div>
+    </div>
+
+  </form>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div id="suc">
+    <div class="suc-card">
+      <div class="suc-ring">✅</div>
+      <h2 class="suc-t">¡Gracias por tu aporte!</h2>
+      <p id="sucMsg" style="color:var(--t3);font-size:14px;line-height:1.75;margin-top:8px"></p>
+      <div class="suc-foot">🏛️ Municipalidad Distrital de Pangoa</div>
+    </div>
+  </div>
+
+</div><!-- /form-area -->
+</div><!-- /wrap -->
 
 <script>
-    emailjs.init("rkEmoXTkGniBt1_t-");
+emailjs.init("rkEmoXTkGniBt1_t-");
 
-    /* ── Scroll progress ── */
-    window.addEventListener('scroll', () => {
-        const doc = document.documentElement;
-        const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
-        document.getElementById('scrollProgress').style.width = pct + '%';
+/* ── CANVAS ANIMATED BACKGROUND ── */
+(function(){
+  const cv=document.getElementById('bgCanvas');
+  const ctx=cv.getContext('2d');
+  let W,H,pts=[];
 
-        /* Steps nav highlight */
-        const steps = document.querySelectorAll('.step-item');
-        const secHeaders = document.querySelectorAll('.section-header');
-        secHeaders.forEach((el, i) => {
-            const rect = el.getBoundingClientRect();
-            if (rect.top < window.innerHeight * 0.5) {
-                steps.forEach(s => s.classList.remove('active'));
-                if (steps[i]) steps[i].classList.add('active');
-            }
-        });
-    });
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+  resize();
+  window.addEventListener('resize',resize);
 
-    /* ── Scroll reveal ── */
-    const revealEls = document.querySelectorAll('.reveal');
-    const revealObs = new IntersectionObserver((entries) => {
-        entries.forEach((e, i) => {
-            if (e.isIntersecting) {
-                e.target.style.transitionDelay = (i % 3) * 0.06 + 's';
-                e.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.12 });
-    revealEls.forEach(el => revealObs.observe(el));
+  function mkPt(){
+    return{
+      x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,
+      r:Math.random()*1.8+.6,
+      a:Math.random()*.7+.15,
+      col:Math.random()<.6?'rgba(31,115,67,':'rgba(201,162,60,'
+    }
+  }
 
-    /* ── Pair counter ── */
-    let pairCount = 1;
-    function updateCount() {
-        const total = document.querySelectorAll('.pair-card').length;
-        document.getElementById('pairsCountLabel').textContent = total + (total === 1 ? ' caso' : ' casos');
+  for(let i=0;i<90;i++)pts.push(mkPt());
+
+  let grad;
+  function mkGrad(t){
+    grad=ctx.createLinearGradient(0,0,W,H);
+    const s=Math.sin(t*.0003);
+    grad.addColorStop(0,`hsl(${144+s*8},80%,${7+s*2}%)`);
+    grad.addColorStop(.5,`hsl(${148+s*5},72%,${12+s*3}%)`);
+    grad.addColorStop(1,`hsl(${140+s*10},68%,${8+s*2}%)`);
+  }
+
+  function draw(t){
+    mkGrad(t);
+    ctx.fillStyle=grad;
+    ctx.fillRect(0,0,W,H);
+
+    /* mesh lines */
+    ctx.lineWidth=.5;
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<130){
+          const op=(1-d/130)*.12;
+          ctx.strokeStyle=`rgba(92,184,122,${op})`;
+          ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke();
+        }
+      }
     }
 
-    /* ── Add pair ── */
-    document.getElementById('addPairBtn').onclick = () => {
-        pairCount++;
-        const div = document.createElement('div');
-        div.className = 'pair-card';
-        div.id = `pair-${pairCount}`;
-        div.style.animation = 'sectionIn 0.4s ease both';
-        div.innerHTML = `
-            <div class="pair-card-header">
-                <div class="pair-num-badge">✏️ Caso #${pairCount}</div>
-                <button type="button" class="remove-btn" onclick="document.getElementById('pair-${pairCount}').remove();updateCount();">✕ Eliminar</button>
-            </div>
-            <div class="pair-field">
-                <div class="pair-field-label">❓ Pregunta del ciudadano</div>
-                <div class="field-hint">Escribe la pregunta tal como la dice el ciudadano.</div>
-                <textarea name="pregunta[]" rows="2" placeholder="Escribe la pregunta aquí..."></textarea>
-            </div>
-            <div class="pair-field">
-                <div class="pair-field-label">💬 Tu respuesta oficial</div>
-                <div class="field-hint">Escribe la respuesta que das en ventanilla.</div>
-                <textarea name="respuesta[]" rows="3" placeholder="Escribe la respuesta oficial..."></textarea>
-            </div>
-            <div class="pair-field">
-                <div class="pair-field-label">🏷️ Categoría del caso</div>
-                <select name="categoria[]">
-                    <option value="otros">Otros</option>
-                    <option value="pagos">💳 Pagos</option>
-                    <option value="deudas">📋 Deudas</option>
-                    <option value="multas">⚠️ Multas</option>
-                    <option value="fraccionamiento">🗓️ Fraccionamiento</option>
-                    <option value="predios">🏠 Predios</option>
-                    <option value="plazos">📅 Plazos</option>
-                    <option value="descuentos">🎁 Descuentos</option>
-                    <option value="tramites">📄 Trámites</option>
-                    <option value="horarios">🕐 Horarios</option>
-                    <option value="ubicacion">📍 Ubicación</option>
-                    <option value="arbitrios">🏙️ Arbitrios</option>
-                </select>
-            </div>
-            <div class="pair-field">
-                <div class="pair-field-label">🔄 Otras formas de hacer la misma pregunta</div>
-                <div class="field-hint">Opcional · Separa con punto y coma (;)</div>
-                <textarea name="variantes[]" rows="2" placeholder="variante 1; variante 2; variante 3"></textarea>
-            </div>
-        `;
-        document.getElementById('pairsContainer').appendChild(div);
-        updateCount();
-        div.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    };
+    /* particles */
+    pts.forEach(p=>{
+      const pulse=.8+.2*Math.sin(t*.002+p.x);
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r*pulse,0,Math.PI*2);
+      ctx.fillStyle=p.col+p.a*pulse+')';ctx.fill();
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<-5||p.x>W+5||p.y<-5||p.y>H+5)Object.assign(p,mkPt());
+    });
 
-    /* ── Submit ── */
-    document.getElementById('encuestaForm').onsubmit = function(e) {
-        e.preventDefault();
+    /* glow orbs */
+    [[W*.15,H*.2,200,'rgba(31,115,67,.06)'],[W*.8,H*.15,160,'rgba(201,162,60,.05)'],[W*.5,H*.5,120,'rgba(42,148,89,.04)']].forEach(([x,y,r,c])=>{
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,c);g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    });
 
-        const btn      = document.getElementById('btnSubmit');
-        const area     = document.getElementById('area').value;
-        const temas    = document.querySelectorAll('input[name="temas"]:checked');
-        const primPreg = document.querySelector('textarea[name="pregunta[]"]').value.trim();
-        const primResp = document.querySelector('textarea[name="respuesta[]"]').value.trim();
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
 
-        if (!area)            { alert("Por favor selecciona tu área.");            return; }
-        if (temas.length===0) { alert("Selecciona al menos un tema frecuente.");  return; }
-        if (!primPreg)        { alert("Completa al menos una pregunta.");          return; }
-        if (!primResp)        { alert("Completa la respuesta del primer caso.");   return; }
+/* ── SCROLL PROGRESS ── */
+window.addEventListener('scroll',()=>{
+  const d=document.documentElement;
+  document.getElementById('bar').style.width=(d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';
+});
 
-        btn.disabled = true;
-        btn.innerHTML = '<div class="submit-icon">⏳</div> Enviando...';
+/* ── REVEAL ON SCROLL ── */
+const rvEls=document.querySelectorAll('.rv');
+const obs=new IntersectionObserver(entries=>entries.forEach((e,i)=>{
+  if(e.isIntersecting){e.target.style.transitionDelay=(i%4)*.07+'s';e.target.classList.add('in')}
+}),{threshold:.1});
+rvEls.forEach(e=>obs.observe(e));
 
-        const preguntas  = document.querySelectorAll('textarea[name="pregunta[]"]');
-        const respuestas = document.querySelectorAll('textarea[name="respuesta[]"]');
-        const categorias = document.querySelectorAll('select[name="categoria[]"]');
-        const variantesT = document.querySelectorAll('textarea[name="variantes[]"]');
+/* ── CHIP RIPPLE ── */
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('click',ev=>{
+    const r=document.createElement('span');
+    r.className='chip-ripple';
+    const rect=chip.getBoundingClientRect();
+    const size=Math.max(rect.width,rect.height);
+    r.style.cssText=`width:${size}px;height:${size}px;left:${ev.clientX-rect.left-size/2}px;top:${ev.clientY-rect.top-size/2}px`;
+    chip.appendChild(r);
+    setTimeout(()=>r.remove(),500);
+  });
+});
 
-        const pares_dataset = [];
-        preguntas.forEach((p, i) => {
-            const pregunta  = p.value.trim();
-            const respuesta = respuestas[i] ? respuestas[i].value.trim() : "";
-            if (!pregunta || !respuesta) return;
+/* ── PAIRS ── */
+let pc=1;
+function updCtr(){
+  const n=document.querySelectorAll('.pair-item').length;
+  document.getElementById('ctrLbl').textContent=n+(n===1?' caso':' casos');
+}
 
-            const vars_raw  = variantesT[i] ? variantesT[i].value.trim() : "";
-            const variantes = vars_raw
-                ? vars_raw.split(";").map(v => v.trim()).filter(v => v.length > 0)
-                : [];
+document.getElementById('addBtn').onclick=()=>{
+  pc++;
+  const d=document.createElement('div');
+  d.className='pair-item';d.id=`pair-${pc}`;
+  d.innerHTML=`
+    <div class="pair-hd">
+      <div class="pair-badge">
+        <svg viewBox="0 0 10 10"><path d="M1 9l1.5-4.5L7 1l2 2-4.5 4.5z"/><path d="M6 2l2 2"/></svg>
+        Caso #${pc}
+      </div>
+      <button type="button" class="rm-btn" onclick="this.closest('.pair-item').remove();updCtr()">
+        <svg viewBox="0 0 10 10"><path d="M1 1l8 8M9 1L1 9"/></svg>Eliminar
+      </button>
+    </div>
+    <div class="pair-field"><div class="pfl">❓ Pregunta del ciudadano</div>
+      <div class="pfh">Escribe la pregunta tal como la dice el ciudadano.</div>
+      <textarea class="fl-ta" name="pregunta[]" rows="2" placeholder="Escribe la pregunta aquí..."></textarea>
+    </div>
+    <div class="pair-field"><div class="pfl">💬 Tu respuesta oficial</div>
+      <div class="pfh">Escribe la respuesta que das en ventanilla.</div>
+      <textarea class="fl-ta" name="respuesta[]" rows="3" placeholder="Escribe la respuesta oficial..."></textarea>
+    </div>
+    <div class="pair-field"><div class="pfl">🏷️ Categoría</div>
+      <select name="categoria[]">
+        <option value="otros">Otros</option>
+        <option value="pagos">💳 Pagos</option><option value="deudas">📋 Deudas</option>
+        <option value="multas">⚠️ Multas</option><option value="fraccionamiento">🗓️ Fraccionamiento</option>
+        <option value="predios">🏠 Predios</option><option value="plazos">📅 Plazos</option>
+        <option value="descuentos">🎁 Descuentos</option><option value="tramites">📄 Trámites</option>
+        <option value="horarios">🕐 Horarios</option><option value="ubicacion">📍 Ubicación</option>
+        <option value="arbitrios">🏙️ Arbitrios</option>
+      </select>
+    </div>
+    <div class="pair-field"><div class="pfl">🔄 Otras formas de hacer la misma pregunta</div>
+      <div class="pfh">Opcional · Separa con punto y coma (;)</div>
+      <textarea class="fl-ta" name="variantes[]" rows="2" placeholder="variante 1; variante 2"></textarea>
+    </div>`;
+  document.getElementById('pairsContainer').appendChild(d);
+  updCtr();
+  d.scrollIntoView({behavior:'smooth',block:'center'});
+};
 
-            pares_dataset.push({
-                categoria: categorias[i] ? categorias[i].value : "otros",
-                pregunta,
-                respuesta,
-                variantes
-            });
-        });
+/* ── SUBMIT ── */
+document.getElementById('encuestaForm').onsubmit=function(e){
+  e.preventDefault();
+  const btn=document.getElementById('subBtn');
+  const area=document.getElementById('area');
+  const temas=document.querySelectorAll('input[name="temas"]:checked');
+  const p0=document.querySelector('textarea[name="pregunta[]"]');
+  const r0=document.querySelector('textarea[name="respuesta[]"]');
 
-        const jsonFinal = JSON.stringify(pares_dataset, null, 2);
+  let ok=true;
+  if(!area.value){area.classList.add('err');ok=false}else area.classList.remove('err');
+  if(temas.length===0){document.querySelector('.chips').style.outline='2px solid var(--err)';ok=false}
+  else document.querySelector('.chips').style.outline='';
+  if(!p0.value.trim()){p0.classList.add('err');ok=false}else p0.classList.remove('err');
+  if(!r0.value.trim()){r0.classList.add('err');ok=false}else r0.classList.remove('err');
+  if(!ok){return}
 
-        const metadata = {
-            area:        area,
-            experiencia: document.getElementById('experiencia').value,
-            temas:       Array.from(temas).map(t => t.value),
-            sugerencias: document.getElementById('sugerencias').value,
-            fecha:       new Date().toLocaleString(),
-            total_pares: pares_dataset.length
-        };
+  btn.disabled=true;
+  btn.innerHTML='<div class="sub-ico">⏳</div> Enviando...';
 
-        const mensajeEmail = JSON.stringify({ metadata, dataset: pares_dataset }, null, 2);
+  const Ps=document.querySelectorAll('textarea[name="pregunta[]"]');
+  const Rs=document.querySelectorAll('textarea[name="respuesta[]"]');
+  const Cs=document.querySelectorAll('select[name="categoria[]"]');
+  const Vs=document.querySelectorAll('textarea[name="variantes[]"]');
 
-        emailjs.send("service_yn9w98h", "template_qs4mdkl", { message: mensajeEmail })
-        .then(() => {
-            const blob = new Blob([jsonFinal], { type: "application/json" });
-            const a    = document.createElement("a");
-            a.href     = URL.createObjectURL(blob);
-            a.download = `encuesta_pangoa_${Date.now()}.json`;
-            a.click();
+  const dataset=[];
+  Ps.forEach((p,i)=>{
+    const preg=p.value.trim(),resp=Rs[i]?Rs[i].value.trim():'';
+    if(!preg||!resp)return;
+    const vRaw=Vs[i]?Vs[i].value.trim():'';
+    dataset.push({
+      categoria:Cs[i]?Cs[i].value:'otros',
+      pregunta:preg,respuesta:resp,
+      variantes:vRaw?vRaw.split(';').map(v=>v.trim()).filter(v=>v):[]
+    });
+  });
 
-            document.getElementById('formSection').style.display   = 'none';
-            document.getElementById('successScreen').style.display = 'block';
-            document.getElementById('successMsg').innerHTML = `
-                Tus respuestas fueron enviadas y se descargó un archivo
-                <strong>.json con ${pares_dataset.length} caso(s)</strong> en tu carpeta de Descargas.
-                <div class="success-steps">
-                    <div class="success-steps-title">📱 Envía el archivo por WhatsApp</div>
-                    <ol>
-                        <li>Abre <strong>WhatsApp</strong></li>
-                        <li>Busca el contacto del encargado</li>
-                        <li>Toca el ícono de adjuntar <strong>📎</strong></li>
-                        <li>Selecciona <strong>"Documento"</strong></li>
-                        <li>Busca en <strong>Descargas</strong> el archivo <em>encuesta_pangoa_…</em></li>
-                        <li>Toca <strong>Enviar ✉️</strong></li>
-                    </ol>
-                </div>
-                <em style="font-size:11px;color:var(--text4);display:block;margin-top:12px;">
-                    El archivo tiene el formato exacto para el script de entrenamiento.
-                </em>
-            `;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        })
-        .catch(err => {
-            alert("Error al enviar: " + JSON.stringify(err));
-            btn.disabled = false;
-            btn.innerHTML = '<div class="submit-icon">✉️</div> Reintentar envío';
-        });
-    };
+  const meta={
+    area:area.value,
+    experiencia:document.getElementById('experiencia').value,
+    temas:Array.from(temas).map(t=>t.value),
+    sugerencias:document.getElementById('sugerencias').value,
+    fecha:new Date().toLocaleString(),
+    total_pares:dataset.length
+  };
+
+  emailjs.send("service_yn9w98h","template_qs4mdkl",{message:JSON.stringify({metadata:meta,dataset},null,2)})
+  .then(()=>{
+    const blob=new Blob([JSON.stringify(dataset,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download=`encuesta_pangoa_${Date.now()}.json`;a.click();
+
+    document.getElementById('formSection').style.display='none';
+    document.getElementById('suc').style.display='block';
+    document.getElementById('sucMsg').innerHTML=`
+      Tus respuestas fueron enviadas y se descargó un archivo
+      <strong>.json con ${dataset.length} caso(s)</strong> en tu carpeta de Descargas.
+      <div class="suc-wa">
+        <div class="suc-wa-t">📱 Envía el archivo por WhatsApp</div>
+        <ol>
+          <li>Abre <strong>WhatsApp</strong></li>
+          <li>Busca el contacto del encargado</li>
+          <li>Toca el ícono de adjuntar <strong>📎</strong></li>
+          <li>Selecciona <strong>"Documento"</strong></li>
+          <li>Busca en <strong>Descargas</strong> el archivo <em>encuesta_pangoa_…</em></li>
+          <li>Toca <strong>Enviar ✉️</strong></li>
+        </ol>
+      </div>
+      <em style="font-size:11px;color:var(--t4);display:block;margin-top:12px;">
+        El archivo tiene el formato exacto para el script de entrenamiento.
+      </em>`;
+    window.scrollTo({top:0,behavior:'smooth'});
+  })
+  .catch(err=>{
+    alert('Error al enviar: '+JSON.stringify(err));
+    btn.disabled=false;
+    btn.innerHTML='<div class="sub-ico">✉️</div> Reintentar envío';
+  });
+};
 </script>
 </body>
 </html>
